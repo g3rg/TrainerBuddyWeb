@@ -1,0 +1,35 @@
+TrainerBuddyWEB
+-------------------
+[x] user domain objects
+[x] register new user
+[ ] login page - username and authToken as cookie
+[ ] authentication service - authToken returned
+[ ] locations domain objects
+[ ] service to receive list of locations for a user / authToken combo
+[ ] page to see list of locations and link to googlemap
+[ ] friend domain object
+[ ] 'friend' people...
+[ ] allow friends access to locations and maps
+[ ] list friends, view their locations
+
+TrainerBuddyAgent (Android)
+-----------------
+* capture credentials
+* authenticate
+* service to log gps location at X intervals to SQLite DB
+* service to upload locations to TrainerBuddyWEB at X intervals from SQLite DB
+* SyncAdaptor?
+
+TBWeb
+-----
+* group friends
+* schedule rides with a group
+* send invites to other riders
+* accept invite from other rider
+* reject invite from other rider
+
+TBA
+---
+* ride schedule
+* cancel ride acceptance
+*

@@ -1,0 +1,14 @@
+application: trainerbuddy
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /user/.*
+  script: controllers/users.py
+
+- url: /user
+  script: controllers/users.py
+
+- url: /.*
+  script: controllers/home.py
