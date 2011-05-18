@@ -78,10 +78,10 @@ class LoginUserPage(webapp.RequestHandler):
             userCred = datastore.User.getCredentials(username)
             
             if userCred == passHash :
-                str = 'authToken=' + passHash
-                self.response.headers.add_header('Set-Cookie', str)
-                str = 'username=' + username
-                self.response.headers.add_header('Set-Cookie', str)
+                cookiestr = 'authToken=' + passHash + '; Max-Age=' + str(60)
+                self.response.headers.add_header('Set-Cookie', cookiestr)
+                cookiestr = 'username=' + username + '; Max-Age=' + str(60)
+                self.response.headers.add_header('Set-Cookie', cookiestr)
                 self.redirect('/user/', False)
             else:
                 self.showLoginPage(username, 'Username and password combination is invalid!')
@@ -90,9 +90,13 @@ class DefaultUserPage(webapp.RequestHandler):
     def get(self):
         cookies = self.request.cookies
         logging.info(cookies)
-        username = cookies['username']
-        token = cookies['authToken']
-        if authToken(username, token):
+        username = None
+        token = None
+        if 'username' in cookies:
+            username = cookies['username']
+        if 'token' in cookies:
+            token = cookies['authToken']
+        if username and token and authToken(username, token):
             self.response.out.write('DEFAULT PAGE REACHED AND LOGGED IN!')
         else:
             self.response.out.write('DEFAULT PAGE REACHED AND NOT LOGGED IN!')
