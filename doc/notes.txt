@@ -3,7 +3,7 @@ TrainerBuddyWEB
 [x] user domain objects
 [x] register new user
 [x] login page - username and authToken as cookie
-[ ] login expiry?
+[x] login expiry
 [ ] reset cookie expiry on each page
 [ ] check logged in before showing 'create' user
 [ ] check logged in before showing 'login' user

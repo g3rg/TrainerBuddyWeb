@@ -16,18 +16,24 @@ from base64 import b64encode
 
 from model import datastore
 
+# Set session expiry to 30 minutes for now
+SESSION_EXPIRY = 60 * 30
+
 class CreateUserPage(webapp.RequestHandler):
     def get(self):
         self.showCreatePage('', '', None)
 
     def showCreatePage(self, username, email, reason):
-        template_values = {
-            'username' : username,
-            'email' : email,
-            'failReason' : reason
-        }
-        path = os.path.join(os.path.dirname(__file__),'..','web','createuser.html')
-        self.response.out.write(template.render(path, template_values))
+        if checkAuthCookies(self.request.cookies):
+            self.redirect('/user/', False)
+        else:
+            template_values = {
+                'username' : username,
+                'email' : email,
+                'failReason' : reason
+            }
+            path = os.path.join(os.path.dirname(__file__),'..','web','createuser.html')
+            self.response.out.write(template.render(path, template_values))
 
     def post(self):
         logging.info('Firing create user post handler')
@@ -55,12 +61,15 @@ class CreateUserPage(webapp.RequestHandler):
 
 class LoginUserPage(webapp.RequestHandler):
     def showLoginPage(self, username, msg):
-        template_values = {
-            'username' : username,
-            'failReason' : msg
-        }
-        path = os.path.join(os.path.dirname(__file__),'..','web','login.html')
-        self.response.out.write(template.render(path, template_values))
+        if checkAuthCookies(self.request.cookies):
+            self.redirect('/user/', False)
+        else:        
+            template_values = {
+                'username' : username,
+                'failReason' : msg
+            }
+            path = os.path.join(os.path.dirname(__file__),'..','web','login.html')
+            self.response.out.write(template.render(path, template_values))
     
     def get(self):
         self.showLoginPage('', None)
@@ -78,25 +87,32 @@ class LoginUserPage(webapp.RequestHandler):
             userCred = datastore.User.getCredentials(username)
             
             if userCred == passHash :
-                cookiestr = 'authToken=' + passHash + '; Max-Age=' + str(60)
-                self.response.headers.add_header('Set-Cookie', cookiestr)
-                cookiestr = 'username=' + username + '; Max-Age=' + str(60)
-                self.response.headers.add_header('Set-Cookie', cookiestr)
+                logging.info ("Setting cookies")
+                setAuthCookies(username, password, self.response)
                 self.redirect('/user/', False)
             else:
                 self.showLoginPage(username, 'Username and password combination is invalid!')
             
+class LogoutUserPage(webapp.RequestHandler):
+    def logout(self):
+        if checkAuthCookies(self.request.cookies):
+            clearAuthCookies(self.response)
+        
+        self.redirect('/user/', False)
+        
+        
+    def get(self):
+        self.logout()
+        
+    def put(self):
+        self.logout()            
+            
 class DefaultUserPage(webapp.RequestHandler):
     def get(self):
         cookies = self.request.cookies
-        logging.info(cookies)
-        username = None
-        token = None
-        if 'username' in cookies:
-            username = cookies['username']
-        if 'token' in cookies:
-            token = cookies['authToken']
-        if username and token and authToken(username, token):
+        username = checkAuthCookies(cookies)
+
+        if username != None:
             self.response.out.write('DEFAULT PAGE REACHED AND LOGGED IN!')
         else:
             self.response.out.write('DEFAULT PAGE REACHED AND NOT LOGGED IN!')
@@ -110,25 +126,52 @@ def getPassHash(username, password):
     tmp = hash.digest()
     return b64encode(tmp)
     
+def checkAuthCookies(cookies):
+    logging.info(cookies)
+    username = None
+    token = None
+    
+    if 'username' in cookies:
+        logging.info('Found username')
+        username = cookies['username']
+    if 'authToken' in cookies:
+        logging.info('Found token')
+        token = cookies['authToken']
+    auth = False
+    if username and token:
+        logging.info(username)
+        logging.info(token)
+        if authToken(username, token):
+            logging.info('Authorised')
+            auth = True
+
+    if auth :
+        return username
+    else:
+        return None
+
+    
 def authToken(username, token):
     return token == datastore.User.getCredentials(username)
     
+def setAuthCookies(username, password, response):
+    token = getPassHash(username, password)
+    cookiestr = 'authToken=' + token + '; Max-Age=' + str(SESSION_EXPIRY)
+    response.headers.add_header('Set-Cookie', cookiestr)
+    cookiestr = 'username=' + username + '; Max-Age=' + str(SESSION_EXPIRY)
+    response.headers.add_header('Set-Cookie', cookiestr)
+    
+def clearAuthCookies(response):
+    response.headers.add_header('Set-Cookie', 'authToken=')
+    response.headers.add_header('Set-Cookie', 'username=')    
     
 def main():
     application = webapp.WSGIApplication(
        [('/user/create', CreateUserPage),
         ('/user/login', LoginUserPage),
+        ('/user/logout', LogoutUserPage),
         ('/user/*', DefaultUserPage)
         ], debug=True)                          
-    #  [('/add_user', UserInsertPage),
-    #   ('/users', UsersListPage),
-    #   ('/add_credentials', UserCredentialsInsertPage),
-    #   ('/add_friend', UserFriendsInsertPage),
-    #   ('/user_friends', UserFriendsListPage),
-    #   ('/delete_friend', DeleteFriendPage),
-    #   ('/edit_user', UserEditPage)
-    #  ],
-    #  debug=True)
     run_wsgi_app(application)
 
 
