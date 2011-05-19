@@ -1,36 +1,32 @@
 <html>
 <head>
   <title>Create User</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
 </head>
 <body>
-<form method="post" action="create"
-      style="text-align:center; font: 13px sans-serif">
-  <div style="width: 25em; margin: 1em auto;
-              text-align:left;
-              padding: 0 2em 1.25em 2em;
-              background-color: #d6e9f8;
-              border: 2px solid #67a7e3">
+<form method="post" action="create">
+  <div>
     {% if failReason %}
     {{failReason}}
     {% endif %}
-    <p style="padding: 0; margin: 0">
-      <label for="username" style="width: 3em">Username:</label>
+    <p>
+      <label for="username">Username:</label>
       <input name="username" type="text" value="{{username}}" id="username"/>
     </p>
-    <p style="padding: 0; margin: 0">
-      <label for="email" style="width: 3em">Email:</label>
+    <p>
+      <label for="email">Email:</label>
       <input name="email" type="text" value="{{email}}" id="email"/>
     </p>
     
-    <p style="padding: 0; margin: 0">
-      <label for="password" style="width: 3em">Password:</label>
+    <p>
+      <label for="password">Password:</label>
       <input name="password" type="password" value="" id="password"/>
     </p>
-    <p style="padding: 0; margin: 0">
-      <label for="password2" style="width: 3em">Repeat Password:</label>
+    <p>
+      <label for="password2">Repeat Password:</label>
       <input name="password2" type="password" value="" id="password2"/>
     </p>    
-    <p style="margin-left: 3em">
+    <p>
       <input name="action" value="Register" type="submit"
              id="submit-register" />
     </p>

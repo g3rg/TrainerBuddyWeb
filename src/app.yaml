@@ -4,11 +4,14 @@ runtime: python
 api_version: 1
 
 handlers:
+- url: /style
+  static_dir: web/style
+
 - url: /user/.*
   script: controllers/users.py
 
 - url: /user
   script: controllers/users.py
-
+  
 - url: /.*
   script: controllers/home.py
