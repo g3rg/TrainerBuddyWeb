@@ -125,7 +125,7 @@ class DefaultUserPage(webapp.RequestHandler):
             self.response.out.write('DEFAULT PAGE REACHED AND NOT LOGGED IN!')
 
 class LodgeUserLocation(webapp.RequestHandler):
-    def showLodgeLocationPage(self, lg='', lat='', tm='', srvTm=None, msg=None):
+    def showLodgeLocationPage(self, lg='', lt='', tm='', srvTm=None, msg=None):
         if not checkAuthCookies(self.request.cookies):
             self.redirect('/user/login', False)
         else:
@@ -135,29 +135,53 @@ class LodgeUserLocation(webapp.RequestHandler):
             template_values = {
                 'username' : username,
                 'lg' : lg,
-                'lat' : lat,
+                'lt' : lt,
                 'tm' : tm,
-                'failMsg' : msg
+                'msg' : msg
             }
             
             path = os.path.join(os.path.dirname(__file__),'..','web','lodgeloc.html')
-            # TODO Set authorization cookies to keep session alive
+            # TODO Set authorisation cookies to keep session alive
             self.response.out.write(template.render(path, template_values))    
             
     def get(self):
         self.showLodgeLocationPage()
 
     def post(self):
-        lg = self.request.get('lg')
-        lat = self.request.get('lat')
-        tm = self.request.get('tm')
-        srvTm = datetime.date.today()
+        username = getUserName(self.request.cookies)
+        lg = float(self.request.get('lg'))
+        lt = float(self.request.get('lt'))
+        tm = datetime.datetime.today()
+        srvTm = datetime.datetime.today()
         # convert 'None's to empty string!
                 
-        if lg != None and lat != None and tm != None:
-            self.showLodgeLocationPage(msg='Please enter all information')
-        #else:
-        #    self.showLodgeLocationPage(lg=lg, lt=lt, tm=tm, srvTm=srvTm)
+        if lg in (None,'') or lt in (None, '') or tm in (None, ''):
+            self.showLodgeLocationPage(lg,lt,tm,None,msg='Please enter all information')
+        else:
+            loc = datastore.Location(username=username,lg=lg,lt=lt,tm=tm,srvTm=srvTm)
+            loc.save()
+            self.showLodgeLocationPage(lg=lg, lt=lt, tm=tm, srvTm=srvTm, msg='Lodged Successfully')
+
+class DataDumpPage(webapp.RequestHandler):
+    def get(self):
+        # dump 'session' info
+        username = getUserName(self.request.cookies)
+        # dump users
+        users = datastore.User.all()
+        userList = []
+        for user in users:
+            userList.append(user.username)
+
+        template_values = {
+            'username' : username,
+            'users' : userList,
+            'locations' : datastore.Location.all()
+        }
+
+        path = os.path.join(os.path.dirname(__file__),'..','web','dump.html')
+        # TODO Set authorisation cookies to keep session alive
+        self.response.out.write(template.render(path, template_values))           
+        
 
 def getPassHash(username, password):
     hash = hashlib.md5()
@@ -167,6 +191,13 @@ def getPassHash(username, password):
     hash.update(username)
     tmp = hash.digest()
     return b64encode(tmp)
+    
+def getUserName(cookies):
+    username = None
+    if 'username' in cookies:
+        username = cookies['username']
+        
+    return username    
     
 def checkAuthCookies(cookies):
     logging.info(cookies)
@@ -213,8 +244,9 @@ def main():
         ('/user/login', LoginUserPage),
         ('/user/logout', LogoutUserPage),
         ('/user/ll', LodgeUserLocation),
+        ('/user/dump', DataDumpPage),
         ('/user/*', DefaultUserPage)
-        ], debug=True)                          
+        ], debug=True)
     run_wsgi_app(application)
 
 

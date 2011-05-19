@@ -1,0 +1,29 @@
+<html>
+<head>
+  <title>Data Dump</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+</head>
+<body>
+  <div>
+    Username: {{username}}<br/>
+    Users:<br/>
+    <ul>
+    {% if users %}
+    {% for user in users %}
+    <li>{{user}}</li>
+    {% endfor %}
+    {% endif %}
+    </ul>
+    <br/>
+    Locations:<br/>
+    <ul>
+    {% if locations %}
+    {% for loc in locations %}
+    <li>{{loc.username}} - {{loc.lt}},{{loc.lg}} - {{loc.tm}}</li>
+    {% endfor %}
+    {% endif %}
+    </ul>
+  </div>
+
+</body>
+</html>

@@ -6,15 +6,19 @@
 <body>
 <form method="post" action="ll">
   <div>
-    {% if failReason %}
-    {{failReason}}
+    {% if msg %}
+    {{msg}}
     {% endif %}
     <p>
       <label for="username">Username:</label>{{username}}
     </p>
     <p>
       <label for="lg">Longtitude:</label>
-      <input name="lt" type="longtitude" value="{{longtitude}}" id="lt"/>
+      <input name="lg" type="longtitude" value="{{lg}}" id="lg"/>
+    </p>
+    <p>
+      <label for="lt">Latitude:</label>
+      <input name="lt" type="longtitude" value="{{lt}}" id="lt"/>
     </p>
     <p>
       <input name="action" value="Lodge" type="submit" id="submit-login" />
