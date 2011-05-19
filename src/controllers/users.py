@@ -9,6 +9,8 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 import os
 import logging
+import datetime
+
 from google.appengine.ext.webapp import template
 
 import hashlib
@@ -60,13 +62,14 @@ class CreateUserPage(webapp.RequestHandler):
             self.redirect('/user/', False)
 
 class LoginUserPage(webapp.RequestHandler):
-    def showLoginPage(self, username, msg):
+    def showLoginPage(self, username, msg, nextPage = None):
         if checkAuthCookies(self.request.cookies):
             self.redirect('/user/', False)
         else:        
             template_values = {
                 'username' : username,
-                'failReason' : msg
+                'failReason' : msg,
+                'nextPage' : nextPage
             }
             path = os.path.join(os.path.dirname(__file__),'..','web','login.html')
             self.response.out.write(template.render(path, template_values))
@@ -77,6 +80,7 @@ class LoginUserPage(webapp.RequestHandler):
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
+        nextPage = self.request.get('nextPage')
         
         if username in (None, ''):
             self.showLoginPage('', 'Please enter your username')
@@ -89,7 +93,10 @@ class LoginUserPage(webapp.RequestHandler):
             if userCred == passHash :
                 logging.info ("Setting cookies")
                 setAuthCookies(username, password, self.response)
-                self.redirect('/user/', False)
+                if nextPage not in (None, ''):
+                    self.redirect(nextPage, False)
+                else :
+                    self.redirect('/user/', False)
             else:
                 self.showLoginPage(username, 'Username and password combination is invalid!')
             
@@ -116,6 +123,41 @@ class DefaultUserPage(webapp.RequestHandler):
             self.response.out.write('DEFAULT PAGE REACHED AND LOGGED IN!')
         else:
             self.response.out.write('DEFAULT PAGE REACHED AND NOT LOGGED IN!')
+
+class LodgeUserLocation(webapp.RequestHandler):
+    def showLodgeLocationPage(self, lg='', lat='', tm='', srvTm=None, msg=None):
+        if not checkAuthCookies(self.request.cookies):
+            self.redirect('/user/login', False)
+        else:
+            username = self.request.cookies['username']
+            token = self.request.cookies['authToken']
+            
+            template_values = {
+                'username' : username,
+                'lg' : lg,
+                'lat' : lat,
+                'tm' : tm,
+                'failMsg' : msg
+            }
+            
+            path = os.path.join(os.path.dirname(__file__),'..','web','lodgeloc.html')
+            # TODO Set authorization cookies to keep session alive
+            self.response.out.write(template.render(path, template_values))    
+            
+    def get(self):
+        self.showLodgeLocationPage()
+
+    def post(self):
+        lg = self.request.get('lg')
+        lat = self.request.get('lat')
+        tm = self.request.get('tm')
+        srvTm = datetime.date.today()
+        # convert 'None's to empty string!
+                
+        if lg != None and lat != None and tm != None:
+            self.showLodgeLocationPage(msg='Please enter all information')
+        #else:
+        #    self.showLodgeLocationPage(lg=lg, lt=lt, tm=tm, srvTm=srvTm)
 
 def getPassHash(username, password):
     hash = hashlib.md5()
@@ -170,6 +212,7 @@ def main():
        [('/user/create', CreateUserPage),
         ('/user/login', LoginUserPage),
         ('/user/logout', LogoutUserPage),
+        ('/user/ll', LodgeUserLocation),
         ('/user/*', DefaultUserPage)
         ], debug=True)                          
     run_wsgi_app(application)

@@ -21,6 +21,9 @@
       <input name="action" value="Login" type="submit"
              id="submit-login" />
     </p>
+    {% if nextPage %}
+    <input type="hidden" name="nextPage" id="nextPage" value="{{nextPage}}"/>
+    {% endif %}
   </div>
 </form>
 

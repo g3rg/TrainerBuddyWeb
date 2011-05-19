@@ -1,0 +1,26 @@
+<html>
+<head>
+  <title>Lodge Location</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+</head>
+<body>
+<form method="post" action="ll">
+  <div>
+    {% if failReason %}
+    {{failReason}}
+    {% endif %}
+    <p>
+      <label for="username">Username:</label>{{username}}
+    </p>
+    <p>
+      <label for="lg">Longtitude:</label>
+      <input name="lt" type="longtitude" value="{{longtitude}}" id="lt"/>
+    </p>
+    <p>
+      <input name="action" value="Lodge" type="submit" id="submit-login" />
+    </p>
+  </div>
+</form>
+
+</body>
+</html>

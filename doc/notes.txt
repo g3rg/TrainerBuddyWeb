@@ -7,12 +7,13 @@ TrainerBuddyWEB
 [x] check logged in before showing 'create' user
 [x] check logged in before showing 'login' user
 [x] move stylesheet info into sep stylesheet!
-[ ] reset cookie expiry on each page
-[ ] locations domain objects
+
+[x] locations domain objects
 [ ] page to lodge location for a given user / authToken
 [ ] page to see list of locations and link to googlemap
 [ ] authentication service - authToken returned via JSon
 [ ] service to receive list of locations for a user / authToken combo
+[ ] reset cookie expiry on each page - abstract page handler?
 
 TrainerBuddyAgent (Android)
 -----------------
