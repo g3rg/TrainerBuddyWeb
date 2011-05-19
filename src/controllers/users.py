@@ -148,7 +148,7 @@ class LodgeUserLocation(webapp.RequestHandler):
         self.showLodgeLocationPage()
 
     def post(self):
-        username = getUserName(self.request.cookies)
+        username = getUsername(self.request.cookies)
         lg = float(self.request.get('lg'))
         lt = float(self.request.get('lt'))
         tm = datetime.datetime.today()
@@ -162,10 +162,27 @@ class LodgeUserLocation(webapp.RequestHandler):
             loc.save()
             self.showLodgeLocationPage(lg=lg, lt=lt, tm=tm, srvTm=srvTm, msg='Lodged Successfully')
 
+class ShowMyLocationsPage(webapp.RequestHandler):
+    
+    def get(self):
+        if checkAuthCookies(self.request.cookies):
+            username = getUsername(self.request.cookies)
+            myLocs = datastore.Location.getListForUser(username)
+            template_values = {
+                'username' : username,
+                'locs' : myLocs                
+            }
+            path = os.path.join(os.path.dirname(__file__),'..','web','mylocs.html')
+            # TODO Set authorisation cookies to keep session alive
+            self.response.out.write(template.render(path, template_values))  
+        else:
+            #TODO Set nextPage?
+            self.redirect('/user/login', )
+        
 class DataDumpPage(webapp.RequestHandler):
     def get(self):
         # dump 'session' info
-        username = getUserName(self.request.cookies)
+        username = getUsername(self.request.cookies)
         # dump users
         users = datastore.User.all()
         userList = []
@@ -192,7 +209,7 @@ def getPassHash(username, password):
     tmp = hash.digest()
     return b64encode(tmp)
     
-def getUserName(cookies):
+def getUsername(cookies):
     username = None
     if 'username' in cookies:
         username = cookies['username']
@@ -245,6 +262,7 @@ def main():
         ('/user/logout', LogoutUserPage),
         ('/user/ll', LodgeUserLocation),
         ('/user/dump', DataDumpPage),
+        ('/user/myloc', ShowMyLocationsPage),
         ('/user/*', DefaultUserPage)
         ], debug=True)
     run_wsgi_app(application)

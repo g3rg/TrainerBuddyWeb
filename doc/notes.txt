@@ -9,8 +9,9 @@ TrainerBuddyWEB
 [x] move stylesheet info into sep stylesheet!
 
 [x] locations domain objects
-[ ] page to lodge location for a given user / authToken
-[ ] page to see list of locations and link to googlemap
+[x] page to lodge location for a given user / authToken
+[.] page to see list of locations and link to googlemap for current user
+    [ ] order by time desc
 [ ] authentication service - authToken returned via JSon
 [ ] service to receive list of locations for a user / authToken combo
 [ ] reset cookie expiry on each page - abstract page handler?

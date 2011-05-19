@@ -33,6 +33,12 @@ class Location(db.Model):
     username = db.StringProperty(required=True)
     lg = db.FloatProperty()
     lt = db.FloatProperty()
+    alt = db.FloatProperty()
     tm = db.DateTimeProperty()
     srvTm = db.DateTimeProperty()
     
+    @classmethod
+    def getListForUser(cls, username):
+        if username not in (None, ''):
+            query = cls.gql('WHERE username = :1', username)
+            return query

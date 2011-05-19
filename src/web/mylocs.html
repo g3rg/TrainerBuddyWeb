@@ -1,0 +1,24 @@
+<html>
+<head>
+  <title>Show My Locations</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+</head>
+<body>
+<form method="post" action="ll">
+  <div>
+    {% if msg %}
+    {{msg}}
+    {% endif %}
+    <p>
+      <label for="username">Username:</label>{{username}}
+    </p>
+    <p>
+      {% for loc in locs %}
+      {{loc.tm}} - {{loc.lg}}, {{loc.lt}}<br/>
+      {% endfor %}
+    </p>
+  </div>
+</form>
+
+</body>
+</html>
