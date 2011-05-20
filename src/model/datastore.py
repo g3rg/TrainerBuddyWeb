@@ -40,5 +40,5 @@ class Location(db.Model):
     @classmethod
     def getListForUser(cls, username):
         if username not in (None, ''):
-            query = cls.gql('WHERE username = :1', username)
+            query = cls.gql('WHERE username = :1 ORDER BY tm DESC LIMIT 100', username)
             return query

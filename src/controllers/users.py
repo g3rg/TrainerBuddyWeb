@@ -21,7 +21,12 @@ from model import datastore
 # Set session expiry to 30 minutes for now
 SESSION_EXPIRY = 60 * 30
 
-class CreateUserPage(webapp.RequestHandler):
+class AbstractPage(webapp.RequestHandler):
+    def servePage(self, template_values, page):
+        path = os.path.join(os.path.dirname(__file__), '..', 'web', page + '.html')
+        self.response.out.write(template.render(path,template_values))
+
+class CreateUserPage(AbstractPage):
     def get(self):
         self.showCreatePage('', '', None)
 
@@ -34,8 +39,7 @@ class CreateUserPage(webapp.RequestHandler):
                 'email' : email,
                 'failReason' : reason
             }
-            path = os.path.join(os.path.dirname(__file__),'..','web','createuser.html')
-            self.response.out.write(template.render(path, template_values))
+            self.servePage(template_values, 'createuser')
 
     def post(self):
         logging.info('Firing create user post handler')
@@ -62,10 +66,14 @@ class CreateUserPage(webapp.RequestHandler):
             self.redirect('/user/', False)
 
 class LoginUserPage(webapp.RequestHandler):
-    def showLoginPage(self, username, msg, nextPage = None):
+    def showLoginPage(self, msg = None, nextPage = None):
         if checkAuthCookies(self.request.cookies):
-            self.redirect('/user/', False)
-        else:        
+            if nextPage != None:
+                self.redirect('/user/' + nextPage)
+            else:
+                self.redirect('/user/', False)
+        else:
+            username = getUsername(self.response.cookies)
             template_values = {
                 'username' : username,
                 'failReason' : msg,
@@ -75,7 +83,7 @@ class LoginUserPage(webapp.RequestHandler):
             self.response.out.write(template.render(path, template_values))
     
     def get(self):
-        self.showLoginPage('', None)
+        self.showLoginPage(None)
         
     def post(self):
         username = self.request.get('username')
