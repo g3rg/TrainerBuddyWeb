@@ -73,7 +73,7 @@ class LoginUserPage(webapp.RequestHandler):
             else:
                 self.redirect('/user/', False)
         else:
-            username = getUsername(self.response.cookies)
+            username = getUsername(self.request.cookies)
             template_values = {
                 'username' : username,
                 'failReason' : msg,
@@ -187,7 +187,7 @@ class ShowMyLocationsPage(webapp.RequestHandler):
             #TODO Set nextPage?
             self.redirect('/user/login', )
         
-class DataDumpPage(webapp.RequestHandler):
+class DataDumpPage(AbstractPage):
     def get(self):
         # dump 'session' info
         username = getUsername(self.request.cookies)
@@ -202,11 +202,7 @@ class DataDumpPage(webapp.RequestHandler):
             'users' : userList,
             'locations' : datastore.Location.all()
         }
-
-        path = os.path.join(os.path.dirname(__file__),'..','web','dump.html')
-        # TODO Set authorisation cookies to keep session alive
-        self.response.out.write(template.render(path, template_values))           
-        
+        self.servePage(template_values, 'dump')
 
 def getPassHash(username, password):
     hash = hashlib.md5()
@@ -221,8 +217,11 @@ def getUsername(cookies):
     username = None
     if 'username' in cookies:
         username = cookies['username']
-        
-    return username    
+    
+    if username == None:
+        return ''
+    else:
+        return username    
     
 def checkAuthCookies(cookies):
     logging.info(cookies)
