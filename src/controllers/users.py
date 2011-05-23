@@ -46,13 +46,13 @@ class AbstractPage(webapp.RequestHandler):
                 # validate authToken
                 self.authorised = True
                 self.sessionVars['authorised'] = self.authorised
-        
-    def post(self):
-        self.setAuthVariables()
-        
-    def get(self):
-        self.setAuthVariables()
     
+    def createTemplateVars(self, vars = {}):
+        template_vars = self.sessionVars.copy()
+        for var in vars:
+            template_vars[var] = vars[var]
+
+        return template_vars
 
 class CreateUserPage(AbstractPage):
     def get(self):
@@ -60,8 +60,7 @@ class CreateUserPage(AbstractPage):
         if not self.authorised:
             self.showCreatePage('', '', None)
         else:
-            templateVars = self.sessionVars.copy()
-            templateVars['msg'] = 'Please log out if you want to create a new user'
+            templateVars = self.createTemplateVars({'msg':'Please log out if you want to create a new user'})
             self.servePage(templateVars, 'home')
 
     def showCreatePage(self, username, email, reason):
