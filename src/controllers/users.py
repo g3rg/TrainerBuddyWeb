@@ -22,13 +22,47 @@ from model import datastore
 SESSION_EXPIRY = 60 * 30
 
 class AbstractPage(webapp.RequestHandler):
+    username = ''
+    authToken = None
+    authorised = False
+    sessionVars = {}
+    
     def servePage(self, template_values, page):
         path = os.path.join(os.path.dirname(__file__), '..', 'web', page + '.html')
         self.response.out.write(template.render(path,template_values))
 
+    
+    def setAuthVariables(self):
+        cookies = self.request.cookies
+        if 'username' in cookies:
+            if cookies['username'] not in (None, ''):
+                self.username = cookies['username']
+                self.sessionVars['username'] = self.username
+            
+        if 'authToken' in cookies:
+            if cookies['authToken'] not in (None, ''):
+                self.authToken = cookies['authToken']
+                self.sessionVars['authToken'] = self.authToken
+                # validate authToken
+                self.authorised = True
+                self.sessionVars['authorised'] = self.authorised
+        
+    def post(self):
+        self.setAuthVariables()
+        
+    def get(self):
+        self.setAuthVariables()
+    
+
 class CreateUserPage(AbstractPage):
     def get(self):
-        self.showCreatePage('', '', None)
+        self.setAuthVariables()
+        if not self.authorised:
+            self.showCreatePage('', '', None)
+        else:
+            templateVars = self.sessionVars.copy()
+            templateVars['msg'] = 'Please log out if you want to create a new user'
+            self.servePage(templateVars, 'home')
 
     def showCreatePage(self, username, email, reason):
         if checkAuthCookies(self.request.cookies):
@@ -65,17 +99,17 @@ class CreateUserPage(AbstractPage):
             user.save()
             self.redirect('/user/', False)
 
-class LoginUserPage(webapp.RequestHandler):
+class LoginUserPage(AbstractPage):
     def showLoginPage(self, msg = None, nextPage = None):
+        self.setAuthVariables()
         if checkAuthCookies(self.request.cookies):
             if nextPage != None:
                 self.redirect('/user/' + nextPage)
             else:
                 self.redirect('/user/', False)
         else:
-            username = getUsername(self.request.cookies)
             template_values = {
-                'username' : username,
+                'username' : self.username,
                 'failReason' : msg,
                 'nextPage' : nextPage
             }
@@ -132,7 +166,7 @@ class DefaultUserPage(webapp.RequestHandler):
         else:
             self.response.out.write('DEFAULT PAGE REACHED AND NOT LOGGED IN!')
 
-class LodgeUserLocation(webapp.RequestHandler):
+class LodgeUserLocation(AbstractPage):
     def showLodgeLocationPage(self, lg='', lt='', tm='', srvTm=None, msg=None):
         if not checkAuthCookies(self.request.cookies):
             self.redirect('/user/login', False)
@@ -156,7 +190,8 @@ class LodgeUserLocation(webapp.RequestHandler):
         self.showLodgeLocationPage()
 
     def post(self):
-        username = getUsername(self.request.cookies)
+        self.setAuthVariables()
+        username = self.username
         lg = float(self.request.get('lg'))
         lt = float(self.request.get('lt'))
         tm = datetime.datetime.today()
@@ -170,11 +205,12 @@ class LodgeUserLocation(webapp.RequestHandler):
             loc.save()
             self.showLodgeLocationPage(lg=lg, lt=lt, tm=tm, srvTm=srvTm, msg='Lodged Successfully')
 
-class ShowMyLocationsPage(webapp.RequestHandler):
+class ShowMyLocationsPage(AbstractPage):
     
     def get(self):
+        self.setAuthVariables()
         if checkAuthCookies(self.request.cookies):
-            username = getUsername(self.request.cookies)
+            username = self.username
             myLocs = datastore.Location.getListForUser(username)
             template_values = {
                 'username' : username,
@@ -189,8 +225,9 @@ class ShowMyLocationsPage(webapp.RequestHandler):
         
 class DataDumpPage(AbstractPage):
     def get(self):
+        self.setAuthVariables()
         # dump 'session' info
-        username = getUsername(self.request.cookies)
+        username = self.username
         # dump users
         users = datastore.User.all()
         userList = []
@@ -212,16 +249,7 @@ def getPassHash(username, password):
     hash.update(username)
     tmp = hash.digest()
     return b64encode(tmp)
-    
-def getUsername(cookies):
-    username = None
-    if 'username' in cookies:
-        username = cookies['username']
-    
-    if username == None:
-        return ''
-    else:
-        return username    
+  
     
 def checkAuthCookies(cookies):
     logging.info(cookies)

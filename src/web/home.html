@@ -1,0 +1,23 @@
+<html>
+<head>
+  <title>Home</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+</head>
+<body>
+<form method="post" action="login">
+  <div>
+    {% if msg %}
+    {{msg}}
+    <br/>
+    {% endif %}
+    Welcome to whatever this is.
+    {% if authorised %}
+    <a href='./logout'>Logout</a>
+    {% else %}
+    <a href='./login'>Login</a>
+    {% endif %}
+  </div>
+</form>
+
+</body>
+</html>
