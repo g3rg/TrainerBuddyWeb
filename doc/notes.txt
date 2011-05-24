@@ -10,11 +10,11 @@ TrainerBuddyWEB
 [x] locations domain objects
 [x] page to lodge location for a given user / authToken
 [x] page to see list of locations and link to googlemap for current user
-[ ] abstract page handler
-	[ ] reset cookie expiry on each page
-	[ ] path builder / page serving function 
+[x] abstract page handler
+	[x] reset cookie expiry on each page
+	[x] path builder / page serving function 
+[x] change authtoken to not just be passwordHash
 
-[ ] change authtoken to not just be passwordHash
 [ ] authentication service - authToken returned via JSon
 [ ] service to receive list of locations for a user / authToken combo
 
@@ -28,11 +28,11 @@ TrainerBuddyAgent (Android)
 
 TBWeb
 -----
+[ ] heart rate!
 [ ] friend domain object
 [ ] 'friend' people...
 [ ] allow friends access to locations and maps
 [ ] list friends, view their locations
-
 * group friends
 * schedule rides with a group
 * send invites to other riders
@@ -43,4 +43,4 @@ TBA
 ---
 * ride schedule
 * cancel ride acceptance
-*
+* heart rate!

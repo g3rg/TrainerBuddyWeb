@@ -68,9 +68,11 @@ class AbstractPage(webapp.RequestHandler):
         tmp = hash.digest()
         return b64encode(tmp)        
         
-    def generateToken(self, username, password):
-        # TODO Implement this correctly, don't just use the pass hash! 
-        return self.getPassHash(username, password)
+    def generateToken(self):
+        # TODO Implement this correctly, don't just use the pass hash!
+        userCred = datastore.User.getCredentials(self.username)
+        
+        return self.getPassHash(self.username, userCred)
                 
     def clearAuthDetails(self):
         self.response.headers.add_header('Set-Cookie', 'authToken=')
@@ -151,8 +153,8 @@ class LoginUserPage(AbstractPage):
             userCred = datastore.User.getCredentials(username)
             
             if userCred == passHash :
-                self.authToken = self.generateToken(self.username, password)
                 self.username = username
+                self.authToken = self.generateToken()
                 self.setAuthCookies()
                 self.redirect('/user/', False)
             else:
