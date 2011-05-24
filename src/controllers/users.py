@@ -6,6 +6,7 @@ Created on 18/05/2011
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+from django.utils import simplejson
 
 import os
 import logging
@@ -57,7 +58,12 @@ class AbstractPage(webapp.RequestHandler):
 
     def isTokenValid(self):
         # TODO Implement this correctly!
-        return self.username not in (None, '') and self.authToken not in (None, '')
+        valid = False
+        
+        if self.username not in (None, '') and self.authToken not in (None, ''):
+            valid = True
+            
+        return valid
         
     def getPassHash(self, username, password):
         hash = hashlib.md5()
@@ -244,6 +250,68 @@ class DataDumpPage(AbstractPage):
         }
         self.servePage(template_values, 'dump')
     
+class AuthenticateJson(AbstractPage):
+    def post(self):
+        req = simplejson.loads(self.request.body)
+        username = ''
+        password = ''
+        token = ''
+        
+        if "username" in req: 
+            username = req["username"]
+        if "password" in req:
+            password = req["password"]
+        if "token" in req:
+            token = req["token"]
+        
+        resp = {}
+        
+        if username not in (None, '') and token not in (None, ''):
+            resp = {"auth":True,"msg":"OPTION 1"}
+        elif username not in (None, '') and password not in (None, ''):
+            resp = {"auth":True,"msg":"OPTION 2"}
+        else:
+            resp = {"auth":False,"msg":"Not authenticated"}
+    
+        self.response.out.write(simplejson.dumps(resp))
+    
+    
+class DataDumpJson(AbstractPage):
+    def getData(self):
+        data = {}
+        users = datastore.User.all()
+        userList = []
+        for user in users:
+            userList.append(user.username)
+        
+        data['userlist'] = userList
+        
+        locations = datastore.Location.all()
+        locationList = []
+        for location in locations:
+            locationList.append(location.username + ": " + str(location.lg) + ", " + str(location.lt))
+        
+        data['locations'] = locationList
+        
+        return data
+    
+    def get(self):
+        req = self.request.get('request')
+        logging.info('Ajax Request:' + req)
+        vals = simplejson.loads(self.getData())
+        self.response.out.write(simplejson.dumps(self.getData()))
+
+    def post(self):
+        req = self.request.body
+        logging.info('Ajax Request:' + req)
+        vals = simplejson.loads(req)
+        logging.info('Ajax Response:' + simplejson.dumps(self.getData()))
+        self.response.out.write(simplejson.dumps(self.getData()))        
+    
+class RPCTestPage(AbstractPage):
+    def get(self):
+        self.servePage({}, 'jsontest')    
+    
 def main():
     application = webapp.WSGIApplication(
        [('/user/create', CreateUserPage),
@@ -251,7 +319,10 @@ def main():
         ('/user/logout', LogoutUserPage),
         ('/user/ll', LodgeUserLocation),
         ('/user/dump', DataDumpPage),
+        ('/user/dumpj', DataDumpJson),
+        ('/user/auth', AuthenticateJson),
         ('/user/myloc', ShowMyLocationsPage),
+        ('/user/rpctst', RPCTestPage),
         ('/user/*', DefaultUserPage)
         ], debug=True)
     run_wsgi_app(application)

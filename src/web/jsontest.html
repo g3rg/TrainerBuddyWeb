@@ -1,0 +1,73 @@
+<html>
+<head>
+  <title>JSON RPC Test Page</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+  <script type="text/javascript" src="/js/json2.js"></script>
+  <script type="text/javascript">
+  if( !window.XMLHttpRequest ) XMLHttpRequest = function()
+  {
+    try{ return new ActiveXObject("Msxml2.XMLHTTP.6.0") }catch(e){}
+    try{ return new ActiveXObject("Msxml2.XMLHTTP.3.0") }catch(e){}
+    try{ return new ActiveXObject("Msxml2.XMLHTTP") }catch(e){}
+    try{ return new ActiveXObject("Microsoft.XMLHTTP") }catch(e){}
+    throw new Error("Could not find an XMLHttpRequest alternative.")
+  };
+  
+  function $(id){
+    return document.getElementById(id);
+  }
+  
+  function doRequest() {
+	$('response').value = '';
+    var reqData = $('request').value;
+	
+    var req = new XMLHttpRequest();
+    // req.open('POST', '/user/dump/j', true);
+    req.open('POST', $('requrl').value, true);
+    
+    req.onreadystatechange = function() {
+      if(req.readyState == 4 && req.status == 200) {
+        // var response = null;
+        //try {
+          // response = JSON.parse(req.responseText);
+        //} catch (e) {
+        //  response = req.responseText;
+        //}
+        //callBack(response);
+        callBack(req.responseText);
+     }
+   }
+
+    // Make the actual request
+    req.send(reqData);    
+    
+	  
+  }
+  
+  function callBack(response) {
+	$('response').value = response;
+  }
+  
+  </script>
+  
+</head>
+<body>
+  <div>
+    <p>
+      <label for="requrl">URL:</label>
+      <input type="text" id="requrl" name="requrl"/>
+    <p>
+      <label for="request">Request:</label>
+      <textarea name="request" type="text" id="request">{{request}}</textarea>
+    </p>
+    <p>
+      <label for="Response">Response:</label>
+      <textarea name="response" type="text" id="response"></textarea>
+    </p>
+    <p>
+      <input type="button" value="DoRequest" onclick="doRequest()" />
+    </p>
+  </div>
+
+</body>
+</html>

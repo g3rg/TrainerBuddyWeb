@@ -17,6 +17,8 @@ TrainerBuddyWEB
 
 [ ] authentication service - authToken returned via JSon
 [ ] service to receive list of locations for a user / authToken combo
+[ ] minify json library http://www.crockford.com/javascript/jsmin.html
+[ ] create rpc handling library?
 
 TrainerBuddyAgent (Android)
 -----------------
