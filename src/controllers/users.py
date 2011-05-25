@@ -236,8 +236,6 @@ class ShowMyLocationsPage(AbstractPage):
 class DataDumpPage(AbstractPage):
     def get(self):
         self.setAuthVariables()
-        # dump 'session' info
-        username = self.username
         # dump users
         users = datastore.User.all()
         userList = []
@@ -319,7 +317,7 @@ def main():
         ('/user/logout', LogoutUserPage),
         ('/user/ll', LodgeUserLocation),
         ('/user/dump', DataDumpPage),
-        ('/user/dumpj', DataDumpJson),
+        ('/json/dumpj', DataDumpJson),
         ('/user/auth', AuthenticateJson),
         ('/user/myloc', ShowMyLocationsPage),
         ('/user/rpctst', RPCTestPage),

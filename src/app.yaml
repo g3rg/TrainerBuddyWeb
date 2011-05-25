@@ -16,5 +16,9 @@ handlers:
 - url: /user
   script: controllers/users.py
   
+- url: /json/.*
+  script: controllers/users.py
+  secure: always
+
 - url: /.*
   script: controllers/home.py
