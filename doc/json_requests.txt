@@ -1,0 +1,12 @@
+{"username":"g3rg",
+"password":"mypass"}
+
+
+{"username":"test",
+"token":"6xgAA0D99HJEX4kv+5lDxQ==",
+"locations":
+[
+{"lt":-22.123,"lg":33.23,"corrId":5},
+{"lt":-22.123,"lg":-21.443,"tm":"2010-12-25T00:00:33","corrId":23}
+]
+}
