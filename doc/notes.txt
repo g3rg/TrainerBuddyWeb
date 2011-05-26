@@ -15,10 +15,11 @@ TrainerBuddyWEB
 	[x] path builder / page serving function 
 [x] change authtoken to not just be passwordHash
 
-[ ] authentication service - authToken returned via JSon
-[ ] service to receive list of locations for a user / authToken combo
-[ ] minify json library http://www.crockford.com/javascript/jsmin.html
-[ ] create rpc handling library?
+[x] authentication service - authToken returned via JSon
+[x] service to receive list of locations for a user / authToken combo
+[x] minify json library http://www.crockford.com/javascript/jsmin.html
+    [x] used: http://jscompress.com/
+[x] abstract json / rpc handler
 
 TrainerBuddyAgent (Android)
 -----------------

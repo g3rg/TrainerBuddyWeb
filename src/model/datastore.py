@@ -36,6 +36,7 @@ class Location(db.Model):
     alt = db.FloatProperty()
     tm = db.DateTimeProperty()
     srvTm = db.DateTimeProperty()
+    corrId = db.IntegerProperty()
     
     @classmethod
     def getListForUser(cls, username):

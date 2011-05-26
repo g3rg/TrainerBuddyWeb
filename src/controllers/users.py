@@ -69,14 +69,19 @@ class AbstractPage(webapp.RequestHandler):
     def isUserAuthorised(self):
         return self.isTokenValid()
 
-    def isTokenValid(self):
+    def isTokenValid(self, token=None):
         # TODO Implement this correctly!
         valid = False
         
+        if token == None:
+            token = self.authToken
+        
         if self.username not in (None, '') and self.authToken not in (None, ''):
-            valid = True
+            valid = self.generateToken() == token
             
         return valid
+
+        
         
     def getPassHash(self, username, password):
         hash = hashlib.md5()
@@ -254,31 +259,6 @@ class DataDumpPage(AbstractPage):
         }
         self.servePage(template_values, 'dump')
     
-class AuthenticateJson(AbstractPage):
-    def post(self):
-        req = simplejson.loads(self.request.body)
-        username = ''
-        password = ''
-        token = ''
-        
-        if "username" in req: 
-            username = req["username"]
-        if "password" in req:
-            password = req["password"]
-        if "token" in req:
-            token = req["token"]
-        
-        resp = {}
-        
-        if username not in (None, '') and token not in (None, ''):
-            resp = {"auth":True,"msg":"OPTION 1"}
-        elif username not in (None, '') and password not in (None, ''):
-            resp = {"auth":True,"msg":"OPTION 2"}
-        else:
-            resp = {"auth":False,"msg":"Not authenticated"}
-    
-        self.response.out.write(simplejson.dumps(resp))
-    
 class LoginJson(AbstractPage):
     def post(self):
         msg = None
@@ -303,89 +283,70 @@ class LoginJson(AbstractPage):
         
         self.response.out.write(simplejson.dumps({"msg":msg, "token":token}))
 
-class LodgeCurrentUserInfoJSON(AbstractPage):
+class AbstractJSON(AbstractPage):
+    req = None
+    uesrname = None
+    token = None
+    authorised = False
+    
+    def checkRequest(self):
+        logging.info('Ajax Request:' + self.request.body)        
+        self.req = simplejson.loads(self.request.body)
+        
+        if "username" in self.req:
+            self.username = self.req["username"]
+        if "token" in self.req:
+            self.authToken = self.req["token"]
+            
+        if self.username in (None, '') or self.authToken in (None, '') or not self.isTokenValid():
+            self.authorised = False
+        else:
+            self.authorised = True
+        
+class LodgeCurrentUserInfoJSON(AbstractJSON):
     def post(self):
-        username = None
-        token = None
+        self.checkRequest()
         data = None
         msg = None
-        logging.info('Ajax Request:' + self.request.body)        
-        req = simplejson.loads(self.request.body)
 
-        if "username" in req:
-            username = req["username"]
-        if "token" in req:
-            token = req["username"]
-        if username in (None, '') or token in (None, ''):
-            msg = 'Not Authorised'
-        else:
-            lg = None
-            lt = None
-            tm = None
-            srvTm = datetime.datetime.today()
+        if self.authorised:
+            if "locations" in self.req:
+                locationsSaved = []
+                locationsFailed = []
+                for location in self.req["locations"]:
+                    lg = None
+                    lt = None
+                    tm = None
+                    corrId = None
+                    srvTm = datetime.datetime.today()
             
-            if "lg" in req:
-                lg = float(req['lg'])
-            if "lt" in req:
-                lt = float(req['lt'])
-            if "tm" in req:
-                # TODO Work on parsing this properly!
-                tm = datetime.datetime.strptime(req['tm'], '%Y-%m-%dT%H:%M:%S')
+                    if "lg" in location:
+                        lg = float(location['lg'])
+                    if "lt" in location:
+                        lt = float(location['lt'])
+                    if "tm" in location:
+                        tm = datetime.datetime.strptime(location['tm'], '%Y-%m-%dT%H:%M:%S')
+                    if "corrId" in location:
+                        corrId = int(location["corrId"])
 
-            if lg in (None,'') or lt in (None, ''):
-                msg = 'Long and Lat missing'
+                    if lg in (None,'') or lt in (None, ''):
+                        if corrId in (None, ''):
+                            locationsFailed.append("%f, %f"%(lg,lt))
+                        else:
+                            locationsFailed.append(corrId)
+                    else:
+                        loc = datastore.Location(username=self.username,lg=lg,lt=lt,tm=tm,srvTm=srvTm,corrId=corrId)
+                        loc.save()
+                        if corrId in (None, ''):
+                            locationsSaved.append("%f, %f"%(lg,lt))
+                        else:
+                            locationsSaved.append(corrId)
+                data = {"saved":locationsSaved, "failed":locationsFailed}
+                msg = "Locations processed" 
             else:
-                loc = datastore.Location(username=username,lg=lg,lt=lt,tm=tm,srvTm=srvTm)
-                loc.save()
-                
-                data = "Location not yet serialisable to JSON"
-                msg='Lodged Successfully'
-            
-        self.response.out.write(simplejson.dumps({"msg":msg, "data":data}))
-    
-class DataDumpJson(AbstractPage):
-    def getData(self):
-        data = {}
-        users = datastore.User.all()
-        userList = []
-        for user in users:
-            userList.append(user.username)
-        
-        data['userlist'] = userList
-        
-        locations = datastore.Location.all()
-        locationList = []
-        for location in locations:
-            locationList.append(location.username + ": " + str(location.lg) + ", " + str(location.lt))
-        
-        data['locations'] = locationList
-        
-        return data
-    
-#    def get(self):
-#        req = self.request.get('request')
-#        logging.info('Ajax Request:' + req)
-#        vals = simplejson.loads(self.getData())
-#        self.response.out.write(simplejson.dumps(self.getData()))
-
-    def post(self):
-        username = None
-        token = None
-        data = None
-        msg = None
-        logging.info('Ajax Request:' + self.request.body)        
-        req = simplejson.loads(self.request.body)
-
-        if "username" in req:
-            username = req["username"]
-        if "token" in req:
-            token = req["username"]
-        if username in (None, '') or token in (None, ''):
-            msg = 'Not Authorised'
-            
+                msg = "Missing locations data"
         else:
-            logging.info('Ajax Response:' + simplejson.dumps(self.getData()))
-            data = self.getData()
+            msg = 'Not Authorised'
             
         self.response.out.write(simplejson.dumps({"msg":msg, "data":data}))
             
@@ -401,10 +362,8 @@ def main():
         ('/user/logout', LogoutUserPage),
         ('/user/ll', LodgeUserLocation),
         ('/user/dump', DataDumpPage),
-        ('/user/auth', AuthenticateJson),
         ('/user/myloc', ShowMyLocationsPage),
         ('/user/rpctst', RPCTestPage),
-        ('/json/dumpj', DataDumpJson),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)
