@@ -31,6 +31,19 @@ class AbstractPage(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), '..', 'web', page + '.html')
         self.response.out.write(template.render(path,fullTemplateValues))
     
+    def login(self, username, password):
+        passHash = self.getPassHash(username, password)            
+        userCred = datastore.User.getCredentials(username)
+        result = False
+        
+        if userCred == passHash :
+            self.username = username
+            self.authToken = self.generateToken()
+            self.setAuthCookies()
+            result = True
+            
+        return result
+    
     def setAuthVariables(self):
         cookies = self.request.cookies
         if 'username' in cookies and cookies['username'] not in (None, '', u''):
@@ -77,7 +90,6 @@ class AbstractPage(webapp.RequestHandler):
     def generateToken(self):
         # TODO Implement this correctly, don't just use the pass hash!
         userCred = datastore.User.getCredentials(self.username)
-        
         return self.getPassHash(self.username, userCred)
                 
     def clearAuthDetails(self):
@@ -155,13 +167,7 @@ class LoginUserPage(AbstractPage):
         elif password in (None, ''):
             self.showLoginPage('', 'Please enter your password')
         else :
-            passHash = self.getPassHash(username, password)            
-            userCred = datastore.User.getCredentials(username)
-            
-            if userCred == passHash :
-                self.username = username
-                self.authToken = self.generateToken()
-                self.setAuthCookies()
+            if self.login(username, password):
                 self.redirect('/user/', False)
             else:
                 self.showLoginPage(username, 'Username and password combination is invalid!')
@@ -273,6 +279,69 @@ class AuthenticateJson(AbstractPage):
     
         self.response.out.write(simplejson.dumps(resp))
     
+class LoginJson(AbstractPage):
+    def post(self):
+        msg = None
+        token = None
+        username = None
+        password = None
+        
+        req = simplejson.loads(self.request.body)
+        
+        if "username" in req:
+            username = req["username"]
+        if "password" in req:
+            password = req["password"]
+        
+        if username in (None, '') or password in (None, ''):
+            msg = 'Parameters not complete'
+        else:
+            if self.login(username, password):
+                token = self.authToken
+            else:
+                msg = 'Login failed'
+        
+        self.response.out.write(simplejson.dumps({"msg":msg, "token":token}))
+
+class LodgeCurrentUserInfoJSON(AbstractPage):
+    def post(self):
+        username = None
+        token = None
+        data = None
+        msg = None
+        logging.info('Ajax Request:' + self.request.body)        
+        req = simplejson.loads(self.request.body)
+
+        if "username" in req:
+            username = req["username"]
+        if "token" in req:
+            token = req["username"]
+        if username in (None, '') or token in (None, ''):
+            msg = 'Not Authorised'
+        else:
+            lg = None
+            lt = None
+            tm = None
+            srvTm = datetime.datetime.today()
+            
+            if "lg" in req:
+                lg = float(req['lg'])
+            if "lt" in req:
+                lt = float(req['lt'])
+            if "tm" in req:
+                # TODO Work on parsing this properly!
+                tm = datetime.datetime.strptime(req['tm'], '%Y-%m-%dT%H:%M:%S')
+
+            if lg in (None,'') or lt in (None, ''):
+                msg = 'Long and Lat missing'
+            else:
+                loc = datastore.Location(username=username,lg=lg,lt=lt,tm=tm,srvTm=srvTm)
+                loc.save()
+                
+                data = "Location not yet serialisable to JSON"
+                msg='Lodged Successfully'
+            
+        self.response.out.write(simplejson.dumps({"msg":msg, "data":data}))
     
 class DataDumpJson(AbstractPage):
     def getData(self):
@@ -293,18 +362,33 @@ class DataDumpJson(AbstractPage):
         
         return data
     
-    def get(self):
-        req = self.request.get('request')
-        logging.info('Ajax Request:' + req)
-        vals = simplejson.loads(self.getData())
-        self.response.out.write(simplejson.dumps(self.getData()))
+#    def get(self):
+#        req = self.request.get('request')
+#        logging.info('Ajax Request:' + req)
+#        vals = simplejson.loads(self.getData())
+#        self.response.out.write(simplejson.dumps(self.getData()))
 
     def post(self):
-        req = self.request.body
-        logging.info('Ajax Request:' + req)
-        vals = simplejson.loads(req)
-        logging.info('Ajax Response:' + simplejson.dumps(self.getData()))
-        self.response.out.write(simplejson.dumps(self.getData()))        
+        username = None
+        token = None
+        data = None
+        msg = None
+        logging.info('Ajax Request:' + self.request.body)        
+        req = simplejson.loads(self.request.body)
+
+        if "username" in req:
+            username = req["username"]
+        if "token" in req:
+            token = req["username"]
+        if username in (None, '') or token in (None, ''):
+            msg = 'Not Authorised'
+            
+        else:
+            logging.info('Ajax Response:' + simplejson.dumps(self.getData()))
+            data = self.getData()
+            
+        self.response.out.write(simplejson.dumps({"msg":msg, "data":data}))
+            
     
 class RPCTestPage(AbstractPage):
     def get(self):
@@ -317,10 +401,12 @@ def main():
         ('/user/logout', LogoutUserPage),
         ('/user/ll', LodgeUserLocation),
         ('/user/dump', DataDumpPage),
-        ('/json/dumpj', DataDumpJson),
         ('/user/auth', AuthenticateJson),
         ('/user/myloc', ShowMyLocationsPage),
         ('/user/rpctst', RPCTestPage),
+        ('/json/dumpj', DataDumpJson),
+        ('/json/ll', LodgeCurrentUserInfoJSON),
+        ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)
         ], debug=True)
     run_wsgi_app(application)
