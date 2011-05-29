@@ -27,7 +27,21 @@ class User(db.Model):
         if username not in (None, ''):
             query = cls.gql('WHERE username = :1', username)
             return query.get() != None
-        
+
+class Friend(db.Model):
+    username = db.StringProperty(required=True)
+    friend = db.StringProperty(required=True)
+    confirmed = db.BooleanProperty(required=True, default=False)
+    
+    @classmethod
+    def getFriends(cls, username):
+        friends = []
+        if username not in (None, ''):
+            query = cls.gql('WHERE username = :1 AND confirmed = TRUE', username)
+            for friend in query:
+                friends.append(friend.friend)
+            
+        return friends
     
 class Location(db.Model):
     username = db.StringProperty(required=True)

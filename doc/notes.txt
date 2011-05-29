@@ -20,6 +20,11 @@ TrainerBuddyWEB
 [x] minify json library http://www.crockford.com/javascript/jsmin.html
     [x] used: http://jscompress.com/
 [x] abstract json / rpc handler
+[x] friend domain object
+[ ] 'friend' people...
+[ ] allow friends access to locations and maps
+[ ] list friends, view their locations
+[ ] change token to be valid for x amount of time?
 
 TrainerBuddyAgent (Android)
 -----------------
@@ -32,15 +37,12 @@ TrainerBuddyAgent (Android)
 TBWeb
 -----
 [ ] heart rate!
-[ ] friend domain object
-[ ] 'friend' people...
-[ ] allow friends access to locations and maps
-[ ] list friends, view their locations
 * group friends
 * schedule rides with a group
 * send invites to other riders
 * accept invite from other rider
 * reject invite from other rider
+* list who's coming on a ride
 
 TBA
 ---

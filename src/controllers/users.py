@@ -242,8 +242,28 @@ class ShowMyLocationsPage(AbstractPage):
             }
             self.servePage(template_values, 'mylocs')
         else:
-            self.redirect('/user/login', )
+            self.redirect('/user/login', False)
         
+class EditFriendsPage(AbstractPage):
+    def get(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            friends = datastore.Friend.getFriends(self.username)
+            template_values = {
+                'friends':friends
+            }
+            self.servPage(template_values, 'friends')
+        else:
+            self.redirect('/user/login', False)        
+        
+    def post(self):
+        
+        friends = datastore.Friend.getFriends(self.username)
+        template_values = {
+                        
+        }
+        self.servPage(template_values, 'friends')    
+    
 class DataDumpPage(AbstractPage):
     def get(self):
         self.setAuthVariables()
