@@ -261,6 +261,12 @@ class DataDumpPage(AbstractPage):
     
 class LoginJson(AbstractPage):
     def post(self):
+        #self.response.headers['Access-Control-Allow-Origin'] = '*'
+        #self.response.headers['Access-Control-Allow-Headers'] = '*'
+        #self.response.headers['Access-Control-Allow-Methods'] = 'POST'      
+        self.response.headers.add_header("Access-Control-Allow-Origin", "*")
+        self.response.headers.add_header("Access-Control-Allow-Headers", "*")  
+        logging.info("Attempting JSON login")
         msg = None
         token = None
         username = None
@@ -281,7 +287,13 @@ class LoginJson(AbstractPage):
             else:
                 msg = 'Login failed'
         
+        self.response.headers['Access-Control-Allow-Origin'] = self.request.headers['Origin']
         self.response.out.write(simplejson.dumps({"msg":msg, "token":token}))
+
+    def options(self):
+        logging.info("Executing options")
+        self.response.headers.add_header("Access-Control-Allow-Origin", "*")
+        self.response.headers.add_header("Access-Control-Allow-Headers", "Content-Type")
 
 class AbstractJSON(AbstractPage):
     req = None
@@ -302,6 +314,11 @@ class AbstractJSON(AbstractPage):
             self.authorised = False
         else:
             self.authorised = True
+            
+    def options(self):
+        logging.info("Executing options")
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers.add_header("Access-Control-Allow-Headers", "Content-Type")
         
 class LodgeCurrentUserInfoJSON(AbstractJSON):
     def post(self):
@@ -347,13 +364,14 @@ class LodgeCurrentUserInfoJSON(AbstractJSON):
                 msg = "Missing locations data"
         else:
             msg = 'Not Authorised'
-            
+
+        self.response.headers.add_header('Access-Control-Allow-Origin', '*')            
         self.response.out.write(simplejson.dumps({"msg":msg, "data":data}))
             
     
 class RPCTestPage(AbstractPage):
     def get(self):
-        self.servePage({}, 'jsontest')    
+        self.servePage({}, 'test')    
     
 def main():
     application = webapp.WSGIApplication(
@@ -363,6 +381,7 @@ def main():
         ('/user/ll', LodgeUserLocation),
         ('/user/dump', DataDumpPage),
         ('/user/myloc', ShowMyLocationsPage),
+        ('/json/rpctst', RPCTestPage),
         ('/user/rpctst', RPCTestPage),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
