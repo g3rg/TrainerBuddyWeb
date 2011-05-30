@@ -6,13 +6,30 @@
 <body>
   <div>
     {% if failReason %}
-    {{failReason}}
+    {{failReason}}<br/>
     {% endif %}
     
     <!-- List Friends, allow remove / confirm friends -->
-    
+    Friends:<br/>
+    <ul>
+    {% if friends %}
+    {% for friend in friends %}
+    <li>{{friend}} - {{friend.confirmed}}</li>
+    {% endfor %}
+    {% endif %}
+    </ul>
     <!-- New Friend! -->
     
+    <form method="post" action="friends">
+    <p>
+      <label for="friendname">Find a Friend:</label>
+      <input name="friendname" type="text" value="{{friendname}}" id="friendname"/>
+    </p>  
+    <p>
+      <input name="action" value="Find" type="submit"
+             id="submit-find" />
+    </p>
+	</form>    
   </div>
 
 </body>

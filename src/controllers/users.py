@@ -252,17 +252,38 @@ class EditFriendsPage(AbstractPage):
             template_values = {
                 'friends':friends
             }
-            self.servPage(template_values, 'friends')
+            self.servePage(template_values, 'friends')
         else:
             self.redirect('/user/login', False)        
         
     def post(self):
-        
-        friends = datastore.Friend.getFriends(self.username)
-        template_values = {
-                        
-        }
-        self.servPage(template_values, 'friends')    
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            # find user
+            newFriend = self.request.get('friendname')
+            msg = ''
+            if newFriend not in (None, '', self.username):
+                logging.info('Creating New Friend')
+                if datastore.User.exists(newFriend):
+                    logging.info('Friend exists')
+                    # check to see if already friends
+                    if not datastore.Friend.alreadyFriends(self.username, newFriend):
+                        friend = datastore.Friend(username=self.username, friend=newFriend, confirmed=False)
+                        friend.save()
+                    else:
+                        logging.info('Already friends')
+                else:
+                    logging.info('Friend not found')
+                    msg = 'Friend not found'
+
+            friends = datastore.Friend.getFriends(self.username)
+            template_values = {
+                'friends': friends,
+                'failReason' : msg
+            }
+            self.servePage(template_values, 'friends')
+        else:
+            self.redirect('/user/login', False)       
     
 class DataDumpPage(AbstractPage):
     def get(self):
@@ -273,9 +294,18 @@ class DataDumpPage(AbstractPage):
         for user in users:
             userList.append(user.username)
 
+        friends = datastore.Friend.all()
+        friendList = []
+        for friend in friends:
+            friendStr = friend.username +  ' - ' + friend.friend + ' - ' 
+            if friend.confirmed:
+                friendStr = friendStr + ' CONFIRMED'
+            friendList.append(friendStr)
+
         template_values = {
             'users' : userList,
-            'locations' : datastore.Location.all()
+            'locations' : datastore.Location.all(),
+            'friends' : friendList
         }
         self.servePage(template_values, 'dump')
     
@@ -403,6 +433,7 @@ def main():
         ('/user/myloc', ShowMyLocationsPage),
         ('/json/rpctst', RPCTestPage),
         ('/user/rpctst', RPCTestPage),
+        ('/user/friends', EditFriendsPage),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)

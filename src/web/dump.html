@@ -24,6 +24,15 @@
     {% endfor %}
     {% endif %}
     </ul>
+    <br/>
+    Friends:<br/>
+    <ul>
+    {% if friends %}
+    {% for friend in friends %}
+    <li>{{friend}}</li>
+    {% endfor %}
+    {% endif %}
+    </ul>    
   </div>
 
 </body>

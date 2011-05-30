@@ -37,12 +37,18 @@ class Friend(db.Model):
     def getFriends(cls, username):
         friends = []
         if username not in (None, ''):
-            query = cls.gql('WHERE username = :1 AND confirmed = TRUE', username)
+            query = cls.gql('WHERE username = :1 AND confirmed = TRUE ORDER by confirmed, friend', username)
             for friend in query:
                 friends.append(friend.friend)
             
         return friends
     
+    @classmethod
+    def alreadyFriends(cls, username, friendname):
+        query = cls.gql('WHERE username = :1 AND friend = :2', username, friendname)
+        return query.fetch(1) > 0
+    
+            
 class Location(db.Model):
     username = db.StringProperty(required=True)
     lg = db.FloatProperty()
