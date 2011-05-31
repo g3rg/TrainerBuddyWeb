@@ -2,6 +2,11 @@
 <head>
   <title>Friends</title>
   <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+  <script language="javascript">
+  function confirmFriend(friend) {
+	  alert("Implement this!")
+  }
+  </script>
 </head>
 <body>
   <div>
@@ -14,12 +19,13 @@
     <ul>
     {% if friends %}
     {% for friend in friends %}
-    <li>{{friend}} - {{friend.confirmed}}</li>
+    <li>{{friend}}{% if not friend.confirmed %}<a href="javascript:confirmFriend('{{friend}}')">Confirm</a>{% endif%}
+    </li>
     {% endfor %}
     {% endif %}
     </ul>
     <!-- New Friend! -->
-    
+
     <form method="post" action="friends">
     <p>
       <label for="friendname">Find a Friend:</label>
@@ -29,7 +35,7 @@
       <input name="action" value="Find" type="submit"
              id="submit-find" />
     </p>
-	</form>    
+	</form>
   </div>
 
 </body>
