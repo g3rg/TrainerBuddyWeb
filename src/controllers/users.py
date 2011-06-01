@@ -292,7 +292,9 @@ class EditFriendsPage(AbstractPage):
                     logging.info('Friend exists')
                     # check to see if already friends
                     if not datastore.Friend.alreadyFriends(self.username, newFriend):
-                        friend = datastore.Friend(username=self.username, friend=newFriend, confirmed=False)
+                        friend = datastore.Friend(username=self.username, friend=newFriend, confirmed=True)
+                        friend.save()
+                        friend = datastore.Friend(username=newFriend, friend=self.username, confirmed=False)
                         friend.save()
                     else:
                         logging.info('Already friends')
