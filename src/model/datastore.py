@@ -32,6 +32,54 @@ class Friend(db.Model):
     username = db.StringProperty(required=True)
     friend = db.StringProperty(required=True)
     confirmed = db.BooleanProperty(required=True, default=False)
+    sharingLocation = db.BooleanProperty(required=False, default=False)
+    
+    @classmethod
+    def removeFriend(cls, username, friendName):
+        friendsDeleted = 0
+        query = cls.gql('WHERE username = :1 AND friend = :2', username, friendName)
+        
+        for friend in query:
+            friend.delete()
+            friendsDeleted = friendsDeleted + 1
+            
+        logging.info('Friends deleted ' + `friendsDeleted`)
+    
+    @classmethod
+    def confirmFriend(cls, username, friendName):
+        friendsConfirmed = 0
+        query = cls.gql('WHERE username = :1 AND friend = :2 and confirmed = False', username, friendName)
+        
+        for friend in query:
+            friend.confirmed = True
+            friendsConfirmed = friendsConfirmed + 1
+            friend.save()
+            
+            logging.info('Friends confirmed ' + `friendsConfirmed`)
+    
+    @classmethod
+    def shareLocation(cls, username, friendName):
+        friendsAltered = 0
+        query = cls.gql('WHERE username = :1 AND friend = :2 and confirmed = True', username, friendName)
+        
+        for friend in query:
+            friend.sharingLocation = True
+            friendsAltered = friendsAltered + 1
+            friend.save()
+            
+            logging.info('Friends altered for sharing ' + `friendsAltered`)    
+    
+    @classmethod
+    def unShareLocation(cls, username, friendName):
+        friendsAltered = 0
+        query = cls.gql('WHERE username = :1 AND friend = :2 and confirmed = True', username, friendName)
+        
+        for friend in query:
+            friend.sharingLocation = False
+            friendsAltered = friendsAltered + 1
+            friend.save()
+            
+            logging.info('Friends altered for sharing ' + `friendsAltered`)      
     
     @classmethod
     def getFriends(cls, username):
@@ -39,7 +87,7 @@ class Friend(db.Model):
         if username not in (None, ''):
             query = cls.gql('WHERE username = :1 ORDER by confirmed, friend', username)
             for friend in query:
-                friends.append(friend.friend)
+                friends.append(friend)
             
         return friends
     

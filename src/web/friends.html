@@ -3,8 +3,35 @@
   <title>Friends</title>
   <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
   <script language="javascript">
+  
+  function $(id){
+    return document.getElementById(id);
+  }  
+  
   function confirmFriend(friend) {
-	  alert("Implement this!")
+	$("subaction").value = 'confirm';
+	$("selectedFriend").value = friend;
+	$("theForm").submit();
+  }
+
+  function shareLocation(friend) {
+	$("subaction").value = 'share';
+	$("selectedFriend").value = friend;
+    $("theForm").submit();
+  }
+  
+  function unShareLocation(friend) {
+	$("subaction").value = 'unshare';
+	$("selectedFriend").value = friend;
+	$("theForm").submit();
+  }  
+  
+  function removeFriend(friend) {
+	if (confirm("Are you sure you want to remove " + friend + " as a friend?")) {
+		$("subaction").value = 'remove';
+		$("selectedFriend").value = friend;
+		$("theForm").submit();
+	}
   }
   </script>
 </head>
@@ -13,20 +40,31 @@
     {% if failReason %}
     {{failReason}}<br/>
     {% endif %}
-    
+        
     <!-- List Friends, allow remove / confirm friends -->
     Friends:<br/>
+    <form method="post" action="friends" name="theForm" id="theForm">
     <ul>
     {% if friends %}
     {% for friend in friends %}
-    <li>{{friend}}{% if not friend.confirmed %}<a href="javascript:confirmFriend('{{friend}}')">Confirm</a>{% endif%}
+    <li>{{friend.friend}}
+    {% if not friend.confirmed %}
+    <a href="javascript:confirmFriend('{{friend.friend}}')">Confirm</a>
+    {% else %}
+    {% if not friend.sharingLocation %}
+    	<a href="javascript:shareLocation('{{friend.friend}}')">Share Location</a>
+  	{% else %}
+  		<a href="javascript:unShareLocation('{{friend.friend}}')">Hide Location</a>
+    {% endif %}
+    {% endif %}
+    <a href="javascript:removeFriend('{{friend.friend}}')">Remove</a>
     </li>
     {% endfor %}
     {% endif %}
     </ul>
     <!-- New Friend! -->
 
-    <form method="post" action="friends">
+
     <p>
       <label for="friendname">Find a Friend:</label>
       <input name="friendname" type="text" value="{{friendname}}" id="friendname"/>
@@ -35,6 +73,8 @@
       <input name="action" value="Find" type="submit"
              id="submit-find" />
     </p>
+    <input name="subaction" id="subaction" value="" type="hidden"/>
+    <input name="selectedFriend" id="selectedFriend" value="" type="hidden"/>
 	</form>
   </div>
 

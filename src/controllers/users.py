@@ -245,6 +245,9 @@ class ShowMyLocationsPage(AbstractPage):
             self.redirect('/user/login', False)
         
 class EditFriendsPage(AbstractPage):
+    subaction = None
+    selectedFriend = None
+    
     def get(self):
         self.setAuthVariables()
         if self.isUserAuthorised():
@@ -256,13 +259,34 @@ class EditFriendsPage(AbstractPage):
         else:
             self.redirect('/user/login', False)        
         
+    def confirm(self, selectedFriend):
+        logging.info('Confirming ' + selectedFriend)
+        datastore.Friend.confirmFriend(self.username, selectedFriend)
+
+    def remove(self, selectedFriend):
+        logging.info('Removing ' + selectedFriend)
+        datastore.Friend.removeFriend(self.username, selectedFriend)
+        
+    def share(self, selectedFriend):
+        logging.info('Sharing location with ' + selectedFriend)
+        datastore.Friend.shareLocation(self.username, selectedFriend)
+        
+    def unshare(self, selectedFriend):
+        logging.info('Unsharing location with ' + selectedFriend)
+        datastore.Friend.unShareLocation(self.username, selectedFriend)
+        
     def post(self):
         self.setAuthVariables()
         if self.isUserAuthorised():
             # find user
             newFriend = self.request.get('friendname')
+            selectedFriend = self.request.get('selectedFriend')
+            subaction = self.request.get('subaction')
+            
             msg = ''
-            if newFriend not in (None, '', self.username):
+            if subaction not in (None, ''):
+                {'confirm':self.confirm,'remove':self.remove,'share':self.share,'unshare':self.unshare}[subaction](selectedFriend);
+            elif newFriend not in (None, '', self.username):
                 logging.info('Creating New Friend')
                 if datastore.User.exists(newFriend):
                     logging.info('Friend exists')
