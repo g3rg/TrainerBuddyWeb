@@ -14,15 +14,26 @@ TrainerBuddyWEB
 	[x] reset cookie expiry on each page
 	[x] path builder / page serving function 
 [x] change authtoken to not just be passwordHash
-
 [x] authentication service - authToken returned via JSon
 [x] service to receive list of locations for a user / authToken combo
 [x] minify json library http://www.crockford.com/javascript/jsmin.html
     [x] used: http://jscompress.com/
 [x] abstract json / rpc handler
 [x] friend domain object
-[ ] 'friend' people...
-[ ] allow friends access to locations and maps
+[x] 'friend' people...
+[x] allow friends access to locations and maps
+
+[ ] create group
+[ ] invite friends to group
+[ ] list groups i own
+[ ] list groups i am in
+
+[ ] schedule rides with a group
+[ ] send invites to other riders
+[ ] accept invite from other rider
+[ ] reject invite from other rider
+[ ] list who's coming on a ride
+[ ] email alerts for cancels or rider list at x-time
 [ ] list friends, view their locations
 [ ] change token to be valid for x amount of time?
 
@@ -37,12 +48,7 @@ TrainerBuddyAgent (Android)
 TBWeb
 -----
 [ ] heart rate!
-* group friends
-* schedule rides with a group
-* send invites to other riders
-* accept invite from other rider
-* reject invite from other rider
-* list who's coming on a ride
+
 
 TBA
 ---

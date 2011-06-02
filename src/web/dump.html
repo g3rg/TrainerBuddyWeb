@@ -32,7 +32,16 @@
     <li>{{friend}}</li>
     {% endfor %}
     {% endif %}
-    </ul>    
+    </ul>
+    <br/>
+    Groups:<br/>
+    <ul>
+    {% if groups %}
+    {% for group in groups %}
+    <li>{{group}}</li>
+    {% endfor %}
+    {% endif%}
+    </ul>
   </div>
 
 </body>

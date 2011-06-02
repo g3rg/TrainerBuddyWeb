@@ -1,0 +1,46 @@
+<html>
+<head>
+  <title>Groups</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+  <script language="javascript">
+  
+  function $(id){
+    return document.getElementById(id);
+  }  
+  
+  </script>
+</head>
+<body>
+  <div>
+    {% if failReason %}
+    {{failReason}}<br/>
+    {% endif %}
+        
+    <!-- List Friends, allow remove / confirm friends -->
+    Groups you run:<br/>
+    <form method="post" action="groups" name="theForm" id="theForm">
+    <ul>
+    {% if groupsOwn %}
+    {% for group in groupsOwn %}
+    <li>{{group.groupName}}</li>
+    {% endfor %}
+    {% endif %}
+    </ul>
+    <!-- New Friend! -->
+
+
+    <p>
+      <label for="groupname">Create a new Group:</label>
+      <input name="groupname" type="text" value="{{groupname}}" id="groupname"/>
+    </p>  
+    <p>
+      <input name="action" value="Find" type="submit"
+             id="submit-find" />
+    </p>
+    <input name="subaction" id="subaction" value="" type="hidden"/>
+    <input name="selectedGroup" id="selectedGroup" value="" type="hidden"/>
+	</form>
+  </div>
+
+</body>
+</html>

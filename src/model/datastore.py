@@ -28,6 +28,27 @@ class User(db.Model):
             query = cls.gql('WHERE username = :1', username)
             return query.get() != None
 
+class Group(db.Model):
+    groupName = db.StringProperty(required=True)
+    owner = db.StringProperty(required=True)
+    members = db.ListProperty(basestring)
+    
+    @classmethod
+    def getGroups(cls, username):
+        groups = []
+        if username not in (None, ''):
+            query = cls.gql('WHERE owner = :1', username)
+            for group in query:
+                groups.append(group)
+            
+        return groups
+    
+    @classmethod
+    def exists(cls, groupname):
+        if groupname not in (None, ''):
+            query = cls.gql('WHERE groupName = :1', groupname)
+            return query.get() != None
+
 class Friend(db.Model):
     username = db.StringProperty(required=True)
     friend = db.StringProperty(required=True)

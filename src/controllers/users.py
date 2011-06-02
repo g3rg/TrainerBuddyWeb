@@ -243,7 +243,58 @@ class ShowMyLocationsPage(AbstractPage):
             self.servePage(template_values, 'mylocs')
         else:
             self.redirect('/user/login', False)
-        
+
+class EditGroupsPage(AbstractPage):
+    subaction = None
+    
+    def get(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            groups = datastore.Group.getGroups(self.username)
+            template_values = {
+                'groups' : groups
+            }
+            self.servePage(template_values, 'groups')
+        else:
+            self.redirect('/user/login', False)
+            
+    def post(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            logging.info('Handling authorised group post request')
+            # find user
+            newGroup = self.request.get('groupname')
+            selectedGroup = self.request.get('selectedGroup')
+            subaction = self.request.get('subaction')
+            
+            msg = ''
+            if subaction not in (None, ''):
+                #{'confirm':self.confirm,'remove':self.remove,'share':self.share,'unshare':self.unshare}[subaction](selectedFriend);
+                logging.info('Handle subaction ' + subaction)
+            elif newGroup not in (None, ''):
+                logging.info('Creating New Group')
+                if datastore.Group.exists(newGroup):
+                    logging.info('Group exists')
+                    msg = 'Group ' + newGroup + ' already exists'
+                else:
+                    group = datastore.Group(groupName=newGroup, owner=self.username)
+                    group.save()
+
+            friends = datastore.Friend.getFriends(self.username)
+            template_values = {
+                'friends': friends,
+                'failReason' : msg
+            }            
+            
+            
+            groups = datastore.Group.getGroups(self.username)
+            template_values = {
+                'groups' : groups
+            }
+            self.servePage(template_values, 'groups')
+        else:
+            self.servePage('/user/login', False)
+
 class EditFriendsPage(AbstractPage):
     subaction = None
     selectedFriend = None
@@ -328,10 +379,18 @@ class DataDumpPage(AbstractPage):
                 friendStr = friendStr + ' CONFIRMED'
             friendList.append(friendStr)
 
+        groups = datastore.Group.all()
+        groupList = []
+        for group in groups:
+            groupStr = group.groupName + ' - ' + group.owner
+            # build list of memebers!
+            groupList.append(groupStr)
+
         template_values = {
             'users' : userList,
             'locations' : datastore.Location.all(),
-            'friends' : friendList
+            'friends' : friendList,
+            'groups' : groupList
         }
         self.servePage(template_values, 'dump')
     
@@ -460,6 +519,7 @@ def main():
         ('/json/rpctst', RPCTestPage),
         ('/user/rpctst', RPCTestPage),
         ('/user/friends', EditFriendsPage),
+        ('/user/groups', EditGroupsPage),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)
