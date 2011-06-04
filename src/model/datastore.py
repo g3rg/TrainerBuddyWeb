@@ -32,9 +32,16 @@ class Group(db.Model):
     groupName = db.StringProperty(required=True)
     owner = db.StringProperty(required=True)
     members = db.ListProperty(basestring)
+    invitees = db.ListProperty(basestring)
     
     @classmethod
-    def getGroups(cls, username):
+    def getGroup(cls, groupName):
+        query = cls.gql('WHERE groupName = :1', groupName)
+        group = query.get()
+        return group
+    
+    @classmethod
+    def getGroupsOwned(cls, username):
         groups = []
         if username not in (None, ''):
             query = cls.gql('WHERE owner = :1', username)
@@ -42,6 +49,26 @@ class Group(db.Model):
                 groups.append(group)
             
         return groups
+    
+    @classmethod
+    def getInviteGroups(cls, username):
+        groups = []
+        if username not in (None, ''):
+            query = cls.gql('WHERE invitees = :1', username)
+            for group in query:
+                groups.append(group)
+        return groups
+    
+    @classmethod
+    def getGroups(cls, username):
+        # CHANGE TO ONLY GET GROUPS THE USER IS IN
+        groups = []
+        if username not in (None, ''):
+            query = cls.gql('WHERE owner != :1 AND members = :1', username)
+            for group in query:
+                groups.append(group)
+            
+        return groups        
     
     @classmethod
     def exists(cls, groupname):

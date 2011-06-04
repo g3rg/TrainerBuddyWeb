@@ -11,13 +11,13 @@ handlers:
   static_dir: web/style
 
 - url: /user/.*
-  script: controllers/users.py
+  script: controllers/master.py
 
 - url: /user
-  script: controllers/users.py
+  script: controllers/master.py
   
 - url: /json/.*
-  script: controllers/users.py
+  script: controllers/master.py
   secure: always
 
 - url: /.*

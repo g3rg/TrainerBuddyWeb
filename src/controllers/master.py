@@ -56,7 +56,7 @@ class AbstractPage(webapp.RequestHandler):
                 self.authToken = cookies['authToken']
             else:
                 self.authToken = None
-
+        
         if self.isUserAuthorised():
             self.setAuthCookies()
             
@@ -67,7 +67,14 @@ class AbstractPage(webapp.RequestHandler):
         self.response.headers.add_header('Set-Cookie', cookiestr)
 
     def isUserAuthorised(self):
-        return self.isTokenValid()
+        # validate user exists
+        username = self.username
+        if username not in (None, ''):
+            cred = datastore.User.getCredentials(username)
+            if cred not in (None, ''):
+                return self.isTokenValid()
+            
+        return False
 
     def isTokenValid(self, token=None):
         # TODO Implement this correctly!
@@ -244,20 +251,75 @@ class ShowMyLocationsPage(AbstractPage):
         else:
             self.redirect('/user/login', False)
 
+class EditGroupPage(AbstractPage):
+    def get(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            groupName = self.request.get('gp')
+            group = datastore.Group.getGroup(groupName)
+            friends = datastore.Friend.getFriends(self.username)
+            template_values = {
+                'group' : group,
+                'friends': friends
+            }
+            self.servePage(template_values, 'group')
+        else:
+            self.redirect('/user/login', False)
+
+    def invite(self, group, selectedFriend):
+        if selectedFriend not in group.members:
+            group.invitees.append(selectedFriend)
+            group.save()
+
+    def post(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            groupName = self.request.get('gp')
+            selectedFriend = self.request.get('selectedFriend')
+            subaction = self.request.get('subaction')
+            
+            group = datastore.Group.getGroup(groupName)
+            
+            if subaction not in (None, ''):
+                {'invite':self.invite}[subaction](group, selectedFriend);
+            
+
+            friends = datastore.Friend.getFriends(self.username)
+            template_values = {
+                'group' : group,
+                'friends' : friends
+            }
+        else:
+            self.redirect('/user/login', False)
+
 class EditGroupsPage(AbstractPage):
     subaction = None
     
     def get(self):
         self.setAuthVariables()
         if self.isUserAuthorised():
+            owned = datastore.Group.getGroupsOwned(self.username)
             groups = datastore.Group.getGroups(self.username)
+            inviteGroups = datastore.Group.getInviteGroups(self.username)
             template_values = {
-                'groups' : groups
+                'ownedGroups' : owned,
+                'groups' : groups,
+                'inviteGroups' : inviteGroups
             }
             self.servePage(template_values, 'groups')
         else:
             self.redirect('/user/login', False)
             
+            
+    def confirm(self, selectedGroup):
+        # find the group
+        # add me to members
+        # remove me from invitees
+        # save
+        
+        return None
+    
+                
     def post(self):
         self.setAuthVariables()
         if self.isUserAuthorised():
@@ -269,7 +331,7 @@ class EditGroupsPage(AbstractPage):
             
             msg = ''
             if subaction not in (None, ''):
-                #{'confirm':self.confirm,'remove':self.remove,'share':self.share,'unshare':self.unshare}[subaction](selectedFriend);
+                {'confirm':self.confirm}[subaction](selectedGroup)
                 logging.info('Handle subaction ' + subaction)
             elif newGroup not in (None, ''):
                 logging.info('Creating New Group')
@@ -278,13 +340,18 @@ class EditGroupsPage(AbstractPage):
                     msg = 'Group ' + newGroup + ' already exists'
                 else:
                     group = datastore.Group(groupName=newGroup, owner=self.username)
+                    userList = []
+                    userList.append(self.username)
+                    group.members = userList
                     group.save()
 
-            friends = datastore.Friend.getFriends(self.username)
+            ownedGroups = datastore.Group.getGroupsOwned(self.username)
+            groups = datastore.Group.getGroups(self.username)
             template_values = {
-                'friends': friends,
-                'failReason' : msg
-            }            
+                'ownedGroups' : ownedGroups,
+                'groups' : groups
+            }
+            self.servePage(template_values, 'groups')        
             
             
             groups = datastore.Group.getGroups(self.username)
@@ -382,8 +449,7 @@ class DataDumpPage(AbstractPage):
         groups = datastore.Group.all()
         groupList = []
         for group in groups:
-            groupStr = group.groupName + ' - ' + group.owner
-            # build list of memebers!
+            groupStr = group.groupName + ' - ' + group.owner + ' - ' + "".join(group.members) + " - " + "".join(group.invitees)
             groupList.append(groupStr)
 
         template_values = {
@@ -520,6 +586,7 @@ def main():
         ('/user/rpctst', RPCTestPage),
         ('/user/friends', EditFriendsPage),
         ('/user/groups', EditGroupsPage),
+        ('/user/group', EditGroupPage),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)

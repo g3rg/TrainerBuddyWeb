@@ -22,20 +22,26 @@ TrainerBuddyWEB
 [x] friend domain object
 [x] 'friend' people...
 [x] allow friends access to locations and maps
+[x] create group
+[x] list groups i own
+[x] list groups i am in
 
-[ ] create group
-[ ] invite friends to group
-[ ] list groups i own
-[ ] list groups i am in
+[x] invite friends to group
+[x] show group invites on groups page
+[ ] confirm membership to group
 
+[ ] ride domain object
 [ ] schedule rides with a group
-[ ] send invites to other riders
+[ ] show invites on groups page
 [ ] accept invite from other rider
 [ ] reject invite from other rider
 [ ] list who's coming on a ride
-[ ] email alerts for cancels or rider list at x-time
+
+[ ] email alerts for invites, cancelations or rider list at x-time before ride starts
 [ ] list friends, view their locations
 [ ] change token to be valid for x amount of time?
+
+[ ] FIX UI!
 
 TrainerBuddyAgent (Android)
 -----------------

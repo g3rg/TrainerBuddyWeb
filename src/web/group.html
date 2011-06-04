@@ -1,0 +1,52 @@
+<html>
+<head>
+  <title>Group</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+  <script language="javascript">
+  
+  function $(id){
+    return document.getElementById(id);
+  }
+  
+  function invite(friend) {
+	$("subaction").value = 'invite';
+	$("selectedFriend").value = friend;
+	$("theForm").submit();
+  }
+  
+  </script>
+</head>
+<body>
+  <div>
+    {% if failReason %}
+    {{failReason}}<br/>
+    {% endif %}
+        
+    Group: {{group.groupName}}<br/>
+    <form method="post" action="group" name="theForm" id="theForm">
+    Members of this group:
+    <ul>
+    {% for friend in group.members %}
+    <li>{{friend}}</li>
+    {% endfor %}
+    </ul>
+    Invitees of this group:<br/>
+    <ul>
+    {% for friend in group.invitees %}
+    <li>{{friend}}</li>
+    {% endfor %}
+    </ul>    
+    <br/>
+    Invite these friends to the group?<br/>
+    {% for friend in friends %}
+    <li><a href="javascript:invite('{{friend.friend}}')">{{friend.friend}}</a></li>
+    {% endfor %}
+    <input name="subaction" id="subaction" value="" type="hidden"/>
+    <input name="selectedFriend" id="selectedFriend" value="" type="hidden"/>
+    <input name="gp" id="gp" value="{{group.groupName}}" type="hidden"/>
+    
+	</form>
+  </div>
+
+</body>
+</html>

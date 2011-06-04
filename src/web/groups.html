@@ -6,7 +6,13 @@
   
   function $(id){
     return document.getElementById(id);
-  }  
+  }
+  
+  function confirm(group) {
+    $("subaction").value = 'confirm';
+    $("selectedGroup").value = group;
+    $("theForm").submit();
+  }
   
   </script>
 </head>
@@ -16,19 +22,31 @@
     {{failReason}}<br/>
     {% endif %}
         
-    <!-- List Friends, allow remove / confirm friends -->
-    Groups you run:<br/>
+    Groups you started:<br/>
     <form method="post" action="groups" name="theForm" id="theForm">
     <ul>
-    {% if groupsOwn %}
-    {% for group in groupsOwn %}
+    {% if ownedGroups %}
+    {% for group in ownedGroups %}
+    <li><a href="group?gp={{group.groupName}}">{{group.groupName}}</a></li>
+    {% endfor %}
+    {% endif %}
+    </ul>
+    Groups you are in:<br/>
+    <ul>
+    {% if groups %}
+    {% for group in groups %}
     <li>{{group.groupName}}</li>
     {% endfor %}
     {% endif %}
     </ul>
-    <!-- New Friend! -->
-
-
+    Groups you are invited to join:<br/>
+    <ul>
+    {% if inviteGroups %}
+    {% for group in inviteGroups %}
+    <li><a href="javscript:confirm('{{group.groupName}}')">{{group.groupName}}</a></li>
+    {% endfor %}
+    {% endif %}
+    </ul>
     <p>
       <label for="groupname">Create a new Group:</label>
       <input name="groupname" type="text" value="{{groupname}}" id="groupname"/>
