@@ -345,7 +345,7 @@ class EditGroupsPage(AbstractPage):
                     logging.info('Group exists')
                     msg = 'Group ' + newGroup + ' already exists'
                 else:
-                    group = datastore.Group(groupName=newGroup, owner=self.username)
+                    group = datastore.Group(groupName=newGroup, owner=datastore.User.getUser(self.username))
                     userList = []
                     userList.append(self.username)
                     group.members = userList
@@ -458,7 +458,6 @@ class EditRidesPage(AbstractPage):
                     ride = datastore.Ride(title=newRide,creator = datastore.User.getUser(self.username))
                     ride.save()
 
-
             createdRides = datastore.Ride.getCreatedRides(self.username)
             
             template_values = {
@@ -489,7 +488,7 @@ class DataDumpPage(AbstractPage):
         groups = datastore.Group.all()
         groupList = []
         for group in groups:
-            groupStr = group.groupName + ' - ' + group.owner + ' - ' + ",".join(group.members) + " - " + ",".join(group.invitees)
+            groupStr = group.groupName + ' - ' + group.owner.username + ' - ' + ",".join(group.members) + " - " + ",".join(group.invitees)
             groupList.append(groupStr)
 
         rides = datastore.Ride.all()

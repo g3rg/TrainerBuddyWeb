@@ -30,10 +30,12 @@ TrainerBuddyWEB
 [x] show group invites on groups page
 [x] confirm membership to group
 
-[ ] ride domain object
+[x] ride domain object
+[x] create a ride
+
 [ ] update domain objects to use ReferenceProperty
 [ ] update controller and pages to handle ReferenceProperty changes
-[ ] create a ride
+[ ] edit ride - date / description
 [ ] invite people to a ride
 	[ ] group
 	[ ] individual

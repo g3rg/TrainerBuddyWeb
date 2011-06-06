@@ -40,7 +40,8 @@ class User(db.Model):
 
 class Group(db.Model):
     groupName = db.StringProperty(required=True)
-    owner = db.StringProperty(required=True)
+    #owner = db.StringProperty(required=True)
+    owner = db.ReferenceProperty(reference_class=User, required=True)
     members = db.ListProperty(basestring)
     invitees = db.ListProperty(basestring)
     
@@ -54,7 +55,8 @@ class Group(db.Model):
     def getGroupsOwned(cls, username):
         groups = []
         if username not in (None, ''):
-            query = cls.gql('WHERE owner = :1', username)
+            user = User.getUser(username)
+            query = cls.gql('WHERE owner = :1', user)
             for group in query:
                 groups.append(group)
             
@@ -74,7 +76,8 @@ class Group(db.Model):
         # CHANGE TO ONLY GET GROUPS THE USER IS IN
         groups = []
         if username not in (None, ''):
-            query = cls.gql('WHERE owner != :1 AND members = :1', username)
+            user = User.getUser(username)
+            query = cls.gql('WHERE owner != :1 AND members = :2', user, username)
             for group in query:
                 groups.append(group)
             
