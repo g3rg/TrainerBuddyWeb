@@ -1,0 +1,42 @@
+<html>
+<head>
+  <title>Rides</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+  <script language="javascript">
+  
+  function $(id){
+    return document.getElementById(id);
+  }
+  
+  </script>
+</head>
+<body>
+  <div>
+    {% if failReason %}
+    {{failReason}}<br/>
+    {% endif %}
+        
+    Rides you created:<br/>
+    <form method="post" action="rides" name="theForm" id="theForm">
+    <ul>
+    {% if createdRides %}
+    {% for ride in createdRides %}
+    <li><a href="ride?ride={{ride.key.id}}">{{ride.title}}</a></li>
+    {% endfor %}
+    {% endif %}
+    </ul>
+    <p>
+      <label for="ridename">Create a new Ride:</label>
+      <input name="ridename" type="text" value="{{ridename}}" id="ridename"/>
+    </p>  
+    <p>
+      <input name="action" value="Create" type="submit"
+             id="submit-find" />
+    </p>
+    <input name="subaction" id="subaction" value="" type="hidden"/>
+    <input name="selectedRide" id="selectedRide" value="" type="hidden"/>
+	</form>
+  </div>
+
+</body>
+</html>

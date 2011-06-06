@@ -4,6 +4,7 @@ Created on 18/05/2011
 @author: g3rg
 '''
 import logging
+import datetime
 
 from google.appengine.ext import db
 
@@ -21,6 +22,15 @@ class User(db.Model):
                 return query.get().passwordHash
             else:
                 return None
+        return None
+    
+    @classmethod
+    def getUser(cls, username):
+        user = None
+        if username not in (None, ''):
+            query = cls.gql('WHERE username = :1', username)
+            user = query.get()
+        return user
     
     @classmethod
     def exists(cls, username):
@@ -144,8 +154,39 @@ class Friend(db.Model):
         query = cls.gql('WHERE username = :1 AND friend = :2', username, friendname)
 
         return query.count(1) > 0
+
+
+class RideComment(db.Model):
+    date = db.DateTimeProperty(default=datetime.datetime.today())
+    user = db.StringProperty()
+    comment = db.StringProperty()
+
+class Ride(db.Model):
+    title = db.StringProperty(required=True)
+    description = db.StringProperty()
+    #http://code.google.com/appengine/docs/python/datastore/typesandpropertyclasses.html#ReferenceProperty
+    creator = db.ReferenceProperty(reference_class=User)
+    date = db.DateTimeProperty()
+    undecided = db.StringListProperty()
+    confirmed = db.StringListProperty()
+    rejected = db.StringListProperty()
+    comments = db.ListProperty(db.Key)
     
-            
+    @classmethod
+    def getCreatedRides(cls, username):
+        user = User.getUser(username)
+        query = cls.gql('WHERE creator = :1', user)
+        rides = []
+        for ride in query:
+            rides.append(ride)
+        return rides
+    
+    @classmethod
+    def exists(cls, ridename):
+        if ridename not in (None, ''):
+            query = cls.gql('WHERE title = :1', ridename)
+            return query.get() != None    
+
 class Location(db.Model):
     username = db.StringProperty(required=True)
     lg = db.FloatProperty()

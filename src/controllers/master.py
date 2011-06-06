@@ -428,6 +428,47 @@ class EditFriendsPage(AbstractPage):
         else:
             self.redirect('/user/login', False)       
     
+class EditRidesPage(AbstractPage):
+    def get(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            createdRides = datastore.Ride.getCreatedRides(self.username)
+            
+            template_values = {
+                'createdRides' : createdRides
+            }
+            self.servePage(template_values, 'rides')
+        else:
+            self.redirect('/user/login', False)        
+    
+    def post(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            # find user
+            newRide = self.request.get('ridename')
+            subaction = self.request.get('subaction')
+            
+            msg = ''
+            if subaction not in (None, ''):
+                {}[subaction]();
+            elif newRide not in (None, ''):
+                if datastore.Ride.exists(newRide):
+                    msg = 'Ride with that name already exists'
+                else:
+                    ride = datastore.Ride(title=newRide,creator = datastore.User.getUser(self.username))
+                    ride.save()
+
+
+            createdRides = datastore.Ride.getCreatedRides(self.username)
+            
+            template_values = {
+                'failReason' : msg,
+                'createdRides' : createdRides
+            }
+            self.servePage(template_values, 'rides')
+        else:
+            self.redirect('/user/login', False)           
+    
 class DataDumpPage(AbstractPage):
     def get(self):
         self.setAuthVariables()
@@ -451,11 +492,17 @@ class DataDumpPage(AbstractPage):
             groupStr = group.groupName + ' - ' + group.owner + ' - ' + ",".join(group.members) + " - " + ",".join(group.invitees)
             groupList.append(groupStr)
 
+        rides = datastore.Ride.all()
+        rideList = []
+        for ride in rides:
+            ridestr = ride.title + ' - ' + ride.creator.username
+            rideList.append(ridestr)
+
         template_values = {
             'users' : userList,
-            'locations' : datastore.Location.all(),
             'friends' : friendList,
-            'groups' : groupList
+            'groups' : groupList,
+            'rides' : rideList
         }
         self.servePage(template_values, 'dump')
     
@@ -586,6 +633,7 @@ def main():
         ('/user/friends', EditFriendsPage),
         ('/user/groups', EditGroupsPage),
         ('/user/group', EditGroupPage),
+        ('/user/rides', EditRidesPage),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)

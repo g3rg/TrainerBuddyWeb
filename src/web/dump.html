@@ -42,6 +42,15 @@
     {% endfor %}
     {% endif%}
     </ul>
+    <br/>
+    Rides:<br/>
+    <ul>
+    {% if rides %}
+    {% for ride in rides %}
+    <li>{{ride}}</li>
+    {% endfor %}
+    {% endif%}
+    </ul>    
   </div>
 
 </body>
