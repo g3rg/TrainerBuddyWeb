@@ -33,8 +33,14 @@ TrainerBuddyWEB
 [x] ride domain object
 [x] create a ride
 
-[ ] update domain objects to use ReferenceProperty
+[x] update domain objects to use ReferenceProperty
 [ ] update controller and pages to handle ReferenceProperty changes
+    [ ] Up to testing group invite page
+    [ ] still need to test lodgeloc and rides
+    
+[ ] domain update - ReferenceProperty for Lists
+[ ] update controller and pages to handle ReferenceProperty lists
+
 [ ] edit ride - date / description
 [ ] invite people to a ride
 	[ ] group

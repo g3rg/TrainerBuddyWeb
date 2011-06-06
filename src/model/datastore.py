@@ -40,7 +40,6 @@ class User(db.Model):
 
 class Group(db.Model):
     groupName = db.StringProperty(required=True)
-    #owner = db.StringProperty(required=True)
     owner = db.ReferenceProperty(reference_class=User, required=True)
     members = db.ListProperty(basestring)
     invitees = db.ListProperty(basestring)
@@ -90,18 +89,21 @@ class Group(db.Model):
             return query.get() != None
 
 class Friend(db.Model):
-    username = db.StringProperty(required=True)
-    friend = db.StringProperty(required=True)
+    user = db.ReferenceProperty(reference_class=User,required=True, collection_name='user_reference')
+    friend = db.ReferenceProperty(reference_class=User,required=True, collection_name='friend_reference')
+    
     confirmed = db.BooleanProperty(required=True, default=False)
     sharingLocation = db.BooleanProperty(required=False, default=False)
     
     @classmethod
     def removeFriend(cls, username, friendName):
         friendsDeleted = 0
-        query = cls.gql('WHERE username = :1 AND friend = :2', username, friendName)
+        user = User.getUser(username)
+        friend = User.getUser(friendName)
+        query = cls.gql('WHERE user = :1 AND friend = :2', user, friend)
         
-        for friend in query:
-            friend.delete()
+        for f in query:
+            f.delete()
             friendsDeleted = friendsDeleted + 1
             
         logging.info('Friends deleted ' + `friendsDeleted`)
@@ -109,59 +111,71 @@ class Friend(db.Model):
     @classmethod
     def confirmFriend(cls, username, friendName):
         friendsConfirmed = 0
-        query = cls.gql('WHERE username = :1 AND friend = :2 and confirmed = False', username, friendName)
+        user = User.getUser(username)
+        friend = User.getUser(friendName)
         
-        for friend in query:
-            friend.confirmed = True
+        query = cls.gql('WHERE user = :1 AND friend = :2 and confirmed = False', user, friend)
+        
+        for f in query:
+            f.confirmed = True
+            f.save()
             friendsConfirmed = friendsConfirmed + 1
-            friend.save()
-            
-            logging.info('Friends confirmed ' + `friendsConfirmed`)
+
+        logging.info('Friends confirmed ' + `friendsConfirmed`)
     
     @classmethod
     def shareLocation(cls, username, friendName):
         friendsAltered = 0
-        query = cls.gql('WHERE username = :1 AND friend = :2 and confirmed = True', username, friendName)
+        user = User.getUser(username)
+        friend = User.getUser(friendName)        
+        query = cls.gql('WHERE user = :1 AND friend = :2 and confirmed = True', user, friend)
         
-        for friend in query:
-            friend.sharingLocation = True
+        for f in query:
+            f.sharingLocation = True
+            f.save()
             friendsAltered = friendsAltered + 1
-            friend.save()
             
-            logging.info('Friends altered for sharing ' + `friendsAltered`)    
+        logging.info('Friends altered for sharing ' + `friendsAltered`)    
     
     @classmethod
     def unShareLocation(cls, username, friendName):
         friendsAltered = 0
-        query = cls.gql('WHERE username = :1 AND friend = :2 and confirmed = True', username, friendName)
+        user = User.getUser(username)
+        friend = User.getUser(friendName)  
+        query = cls.gql('WHERE user = :1 AND friend = :2 and confirmed = True', user, friend)
         
-        for friend in query:
-            friend.sharingLocation = False
+        for f in query:
+            f.sharingLocation = False
+            f.save()
             friendsAltered = friendsAltered + 1
-            friend.save()
             
-            logging.info('Friends altered for sharing ' + `friendsAltered`)      
+            
+        logging.info('Friends altered for sharing ' + `friendsAltered`)      
     
     @classmethod
     def getFriends(cls, username):
         friends = []
         if username not in (None, ''):
-            query = cls.gql('WHERE username = :1 ORDER by confirmed, friend', username)
-            for friend in query:
-                friends.append(friend)
+            user = User.getUser(username)
+            query = cls.gql('WHERE user = :1 ORDER by confirmed, friend', user)
+            for f in query:
+                friends.append(f)
             
         return friends
     
     @classmethod
     def alreadyFriends(cls, username, friendname):
-        query = cls.gql('WHERE username = :1 AND friend = :2', username, friendname)
+        user = User.getUser(username)
+        friend = User.getUser(friendname)
+        
+        query = cls.gql('WHERE user = :1 AND friend = :2', user, friend)
 
         return query.count(1) > 0
 
 
 class RideComment(db.Model):
     date = db.DateTimeProperty(default=datetime.datetime.today())
-    user = db.StringProperty()
+    user = db.ReferenceProperty(reference_class=User)
     comment = db.StringProperty()
 
 class Ride(db.Model):
@@ -170,10 +184,12 @@ class Ride(db.Model):
     #http://code.google.com/appengine/docs/python/datastore/typesandpropertyclasses.html#ReferenceProperty
     creator = db.ReferenceProperty(reference_class=User)
     date = db.DateTimeProperty()
-    undecided = db.StringListProperty()
-    confirmed = db.StringListProperty()
-    rejected = db.StringListProperty()
-    comments = db.ListProperty(db.Key)
+    
+    # TODO Add this as lists of keys into datastore.User
+    #undecided = db.StringListProperty()
+    #confirmed = db.StringListProperty()
+    #rejected = db.StringListProperty()
+    #comments = db.ListProperty(db.Key)
     
     @classmethod
     def getCreatedRides(cls, username):
@@ -191,7 +207,7 @@ class Ride(db.Model):
             return query.get() != None    
 
 class Location(db.Model):
-    username = db.StringProperty(required=True)
+    user = db.ReferenceProperty(reference_class=User,required=True)
     lg = db.FloatProperty()
     lt = db.FloatProperty()
     alt = db.FloatProperty()
@@ -202,5 +218,6 @@ class Location(db.Model):
     @classmethod
     def getListForUser(cls, username):
         if username not in (None, ''):
-            query = cls.gql('WHERE username = :1 ORDER BY tm DESC LIMIT 100', username)
+            user = User.getUser(username)
+            query = cls.gql('WHERE user = :1 ORDER BY tm DESC LIMIT 100', user)
             return query

@@ -20,7 +20,7 @@
     <ul>
     {% if locations %}
     {% for loc in locations %}
-    <li>{{loc.username}} - {{loc.lt}},{{loc.lg}} - {{loc.tm}}</li>
+    <li>{{loc.user.username}} - {{loc.lt}},{{loc.lg}} - {{loc.tm}}</li>
     {% endfor %}
     {% endif %}
     </ul>
