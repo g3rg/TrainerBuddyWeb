@@ -289,6 +289,8 @@ class EditGroupPage(AbstractPage):
                 'group' : group,
                 'friends' : friends
             }
+            
+            self.servePage(template_values, 'group')
         else:
             self.redirect('/user/login', False)
 
@@ -313,12 +315,16 @@ class EditGroupsPage(AbstractPage):
             
     def confirm(self, selectedGroup):
         # find the group
-        # add me to members
-        # remove me from invitees
-        # save
+        group = datastore.Group.getGroup(selectedGroup)
+        username = self.username
         
-        return None
-    
+        if username in group.invitees:
+            if not username in group.members:
+                group.members.append(username)
+                
+            group.invitees.remove(username)
+            group.save()
+        
                 
     def post(self):
         self.setAuthVariables()
@@ -352,13 +358,6 @@ class EditGroupsPage(AbstractPage):
                 'groups' : groups
             }
             self.servePage(template_values, 'groups')        
-            
-            
-            groups = datastore.Group.getGroups(self.username)
-            template_values = {
-                'groups' : groups
-            }
-            self.servePage(template_values, 'groups')
         else:
             self.servePage('/user/login', False)
 
@@ -449,7 +448,7 @@ class DataDumpPage(AbstractPage):
         groups = datastore.Group.all()
         groupList = []
         for group in groups:
-            groupStr = group.groupName + ' - ' + group.owner + ' - ' + "".join(group.members) + " - " + "".join(group.invitees)
+            groupStr = group.groupName + ' - ' + group.owner + ' - ' + ",".join(group.members) + " - " + ",".join(group.invitees)
             groupList.append(groupStr)
 
         template_values = {

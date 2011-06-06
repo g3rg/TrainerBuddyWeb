@@ -28,7 +28,7 @@ TrainerBuddyWEB
 
 [x] invite friends to group
 [x] show group invites on groups page
-[ ] confirm membership to group
+[x] confirm membership to group
 
 [ ] ride domain object
 [ ] schedule rides with a group
