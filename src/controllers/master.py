@@ -259,19 +259,24 @@ class EditGroupPage(AbstractPage):
             groupName = self.request.get('gp')
             group = datastore.Group.getGroup(groupName)
             friends = datastore.Friend.getFriends(self.username)
+            members = group.getMembers()
+            invitees = group.getInvitees()
             template_values = {
                 'group' : group,
+                'members' : members,
+                'invitees' : invitees,
                 'friends': friends
             }
             self.servePage(template_values, 'group')
         else:
             self.redirect('/user/login', False)
 
-    def invite(self, group, selectedFriend):
-        selectedUser = datastore.User.get_by_id([int(selectedFriend)])
+    def invite(self, group, friendKey):
+        selectedUser = datastore.User.get([friendKey])[0]
         
-        if selectedUser and selectedUser[0] and selectedUser[0].username not in group.members:
-            group.invitees.append(selectedFriend)
+        if selectedUser and selectedUser.key() not in group.members and selectedUser.key() not in group.invitees:
+            
+            group.invitees.append(selectedUser.key())
             group.save()
 
     def post(self):
@@ -320,12 +325,13 @@ class EditGroupsPage(AbstractPage):
         # find the group
         group = datastore.Group.getGroup(selectedGroup)
         username = self.username
-        
-        if username in group.invitees:
-            if not username in group.members:
-                group.members.append(username)
+        user = datastore.User.getUser(username)
+         
+        if user.key() in group.invitees:
+            if not user.key() in group.members:
+                group.members.append(user.key())
                 
-            group.invitees.remove(username)
+            group.invitees.remove(user.key())
             group.save()
         
                 
@@ -349,16 +355,17 @@ class EditGroupsPage(AbstractPage):
                     msg = 'Group ' + newGroup + ' already exists'
                 else:
                     group = datastore.Group(groupName=newGroup, owner=datastore.User.getUser(self.username))
-                    userList = []
-                    userList.append(self.username)
-                    group.members = userList
+                    user = datastore.User.getUser(self.username)
+                    group.members.append(user.key())
                     group.save()
 
-            ownedGroups = datastore.Group.getGroupsOwned(self.username)
+            owned = datastore.Group.getGroupsOwned(self.username)
             groups = datastore.Group.getGroups(self.username)
+            inviteGroups = datastore.Group.getInviteGroups(self.username)
             template_values = {
-                'ownedGroups' : ownedGroups,
-                'groups' : groups
+                'ownedGroups' : owned,
+                'groups' : groups,
+                'inviteGroups' : inviteGroups
             }
             self.servePage(template_values, 'groups')        
         else:
@@ -485,7 +492,7 @@ class DataDumpPage(AbstractPage):
         friends = datastore.Friend.all()
         friendList = []
         for friend in friends:
-            friendStr = friend.username +  ' - ' + friend.friend + ' - ' 
+            friendStr = friend.user.username +  ' - ' + friend.friend.username + ' - ' 
             if friend.confirmed:
                 friendStr = friendStr + ' CONFIRMED'
             friendList.append(friendStr)
@@ -493,7 +500,17 @@ class DataDumpPage(AbstractPage):
         groups = datastore.Group.all()
         groupList = []
         for group in groups:
-            groupStr = group.groupName + ' - ' + group.owner.username + ' - ' + ",".join(group.members) + " - " + ",".join(group.invitees)
+            members = group.getMembers()
+            memberStr = ''
+            
+            for member in members:
+                memberStr = memberStr + member.username + ','
+            inviteeStr = ''
+            invitees = group.getInvitees()
+            for invitee in invitees:
+                inviteeStr = inviteeStr + invitee.username + ','             
+                
+            groupStr = group.groupName + ' - ' + group.owner.username + ' - ' + memberStr + " - " + inviteeStr
             groupList.append(groupStr)
 
         rides = datastore.Ride.all()

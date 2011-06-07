@@ -37,12 +37,32 @@ class User(db.Model):
         if username not in (None, ''):
             query = cls.gql('WHERE username = :1', username)
             return query.get() != None
+    
 
 class Group(db.Model):
     groupName = db.StringProperty(required=True)
     owner = db.ReferenceProperty(reference_class=User, required=True)
-    members = db.ListProperty(basestring)
-    invitees = db.ListProperty(basestring)
+    members = db.ListProperty(db.Key)
+    invitees = db.ListProperty(db.Key)
+    
+    def getMembers(self):
+        members = [db.get(key) for key in self.members]
+        
+        memberList = []
+        for member in members:
+            memberList.append(member)
+            
+        return memberList
+    
+    def getInvitees(self):
+        invitees = [db.get(key) for key in self.invitees]
+        
+        inviteeList = []
+        for invitee in invitees:
+            inviteeList.append(invitee)
+            
+        return inviteeList
+        
     
     @classmethod
     def getGroup(cls, groupName):
@@ -65,7 +85,8 @@ class Group(db.Model):
     def getInviteGroups(cls, username):
         groups = []
         if username not in (None, ''):
-            query = cls.gql('WHERE invitees = :1', username)
+            user = User.getUser(username)
+            query = cls.gql('WHERE invitees = :1', user.key())
             for group in query:
                 groups.append(group)
         return groups
@@ -76,7 +97,7 @@ class Group(db.Model):
         groups = []
         if username not in (None, ''):
             user = User.getUser(username)
-            query = cls.gql('WHERE owner != :1 AND members = :2', user, username)
+            query = cls.gql('WHERE owner != :1 AND members = :2', user, user.key())
             for group in query:
                 groups.append(group)
             
@@ -96,10 +117,10 @@ class Friend(db.Model):
     sharingLocation = db.BooleanProperty(required=False, default=False)
     
     @classmethod
-    def removeFriend(cls, username, friendName):
+    def removeFriend(cls, username, friendKey):
         friendsDeleted = 0
         user = User.getUser(username)
-        friend = User.getUser(friendName)
+        friend = User.get([friendKey])[0]
         query = cls.gql('WHERE user = :1 AND friend = :2', user, friend)
         
         for f in query:
@@ -109,10 +130,11 @@ class Friend(db.Model):
         logging.info('Friends deleted ' + `friendsDeleted`)
     
     @classmethod
-    def confirmFriend(cls, username, friendName):
+    def confirmFriend(cls, username, friendKey):
+        
         friendsConfirmed = 0
         user = User.getUser(username)
-        friend = User.getUser(friendName)
+        friend = User.get([friendKey])[0]
         
         query = cls.gql('WHERE user = :1 AND friend = :2 and confirmed = False', user, friend)
         
@@ -124,10 +146,10 @@ class Friend(db.Model):
         logging.info('Friends confirmed ' + `friendsConfirmed`)
     
     @classmethod
-    def shareLocation(cls, username, friendName):
+    def shareLocation(cls, username, friendKey):
         friendsAltered = 0
         user = User.getUser(username)
-        friend = User.getUser(friendName)        
+        friend = User.get([friendKey])[0]        
         query = cls.gql('WHERE user = :1 AND friend = :2 and confirmed = True', user, friend)
         
         for f in query:
@@ -138,10 +160,10 @@ class Friend(db.Model):
         logging.info('Friends altered for sharing ' + `friendsAltered`)    
     
     @classmethod
-    def unShareLocation(cls, username, friendName):
+    def unShareLocation(cls, username, friendKey):
         friendsAltered = 0
         user = User.getUser(username)
-        friend = User.getUser(friendName)  
+        friend = User.get([friendKey])[0]  
         query = cls.gql('WHERE user = :1 AND friend = :2 and confirmed = True', user, friend)
         
         for f in query:

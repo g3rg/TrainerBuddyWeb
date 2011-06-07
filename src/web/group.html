@@ -26,20 +26,24 @@
     <form method="post" action="group" name="theForm" id="theForm">
     Members of this group:
     <ul>
-    {% for friend in group.members %}
-    <li>{{friend}}</li>
+    {% if members %}
+    {% for friend in members %}
+    <li>{{friend.username}}</li>
     {% endfor %}
+    {% endif %}
     </ul>
     Invitees of this group:<br/>
     <ul>
-    {% for friend in group.invitees %}
-    <li>{{friend}}</li>
+    {% if invitees %}
+    {% for friend in invitees %}
+    <li>{{friend.username}}</li>
     {% endfor %}
+    {% endif %}
     </ul>    
     <br/>
     Invite these friends to the group?<br/>
     {% for friend in friends %}
-    <li><a href="javascript:invite('{{friend.friend.key.id}}')">{{friend.friend.username}}</a></li>
+    <li><a href="javascript:invite('{{friend.friend.key}}')">{{friend.friend.username}}</a></li>
     {% endfor %}
     <input name="subaction" id="subaction" value="" type="hidden"/>
     <input name="selectedFriend" id="selectedFriend" value="" type="hidden"/>

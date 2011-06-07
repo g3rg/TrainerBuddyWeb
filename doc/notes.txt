@@ -33,13 +33,11 @@ TrainerBuddyWEB
 [x] ride domain object
 [x] create a ride
 
-[x] update domain objects to use ReferenceProperty
-[ ] update controller and pages to handle ReferenceProperty changes
-    [ ] Up to testing group invite page
-    [ ] still need to test lodgeloc and rides
-    
-[ ] domain update - ReferenceProperty for Lists
-[ ] update controller and pages to handle ReferenceProperty lists
+[x] update domain objects to use ReferenceProperty and Lists of db.Key
+[ ] update controller and pages to handle ReferenceProperty and lists of db.key changes
+
+[ ] remove myself from group? move back to invited?
+[ ] as group owner, remove someone else from the group
 
 [ ] edit ride - date / description
 [ ] invite people to a ride
@@ -56,6 +54,7 @@ TrainerBuddyWEB
 [ ] list friends, view their locations
 [ ] change token to be valid for x amount of time?
 [ ] recurring rides? 'copy ride' link?
+[ ] password reset!
 
 [ ] FIX UI!
 
