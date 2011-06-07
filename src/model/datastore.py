@@ -25,12 +25,16 @@ class User(db.Model):
         return None
     
     @classmethod
-    def getUser(cls, username):
+    def getByUsername(cls, username):
         user = None
         if username not in (None, ''):
             query = cls.gql('WHERE username = :1', username)
             user = query.get()
         return user
+    
+    @classmethod
+    def getByKey(cls, key):
+        return cls.get([key])[0]
     
     @classmethod
     def exists(cls, username):
@@ -63,6 +67,7 @@ class Group(db.Model):
             
         return inviteeList
         
+        
     
     @classmethod
     def getGroup(cls, groupName):
@@ -74,7 +79,7 @@ class Group(db.Model):
     def getGroupsOwned(cls, username):
         groups = []
         if username not in (None, ''):
-            user = User.getUser(username)
+            user = User.getByUsername(username)
             query = cls.gql('WHERE owner = :1', user)
             for group in query:
                 groups.append(group)
@@ -85,7 +90,7 @@ class Group(db.Model):
     def getInviteGroups(cls, username):
         groups = []
         if username not in (None, ''):
-            user = User.getUser(username)
+            user = User.getByUsername(username)
             query = cls.gql('WHERE invitees = :1', user.key())
             for group in query:
                 groups.append(group)
@@ -96,7 +101,7 @@ class Group(db.Model):
         # CHANGE TO ONLY GET GROUPS THE USER IS IN
         groups = []
         if username not in (None, ''):
-            user = User.getUser(username)
+            user = User.getByUsername(username)
             query = cls.gql('WHERE owner != :1 AND members = :2', user, user.key())
             for group in query:
                 groups.append(group)
@@ -119,7 +124,7 @@ class Friend(db.Model):
     @classmethod
     def removeFriend(cls, username, friendKey):
         friendsDeleted = 0
-        user = User.getUser(username)
+        user = User.getByUsername(username)
         friend = User.get([friendKey])[0]
         query = cls.gql('WHERE user = :1 AND friend = :2', user, friend)
         
@@ -133,7 +138,7 @@ class Friend(db.Model):
     def confirmFriend(cls, username, friendKey):
         
         friendsConfirmed = 0
-        user = User.getUser(username)
+        user = User.getByUsername(username)
         friend = User.get([friendKey])[0]
         
         query = cls.gql('WHERE user = :1 AND friend = :2 and confirmed = False', user, friend)
@@ -148,7 +153,7 @@ class Friend(db.Model):
     @classmethod
     def shareLocation(cls, username, friendKey):
         friendsAltered = 0
-        user = User.getUser(username)
+        user = User.getByUsername(username)
         friend = User.get([friendKey])[0]        
         query = cls.gql('WHERE user = :1 AND friend = :2 and confirmed = True', user, friend)
         
@@ -162,7 +167,7 @@ class Friend(db.Model):
     @classmethod
     def unShareLocation(cls, username, friendKey):
         friendsAltered = 0
-        user = User.getUser(username)
+        user = User.getByUsername(username)
         friend = User.get([friendKey])[0]  
         query = cls.gql('WHERE user = :1 AND friend = :2 and confirmed = True', user, friend)
         
@@ -178,7 +183,7 @@ class Friend(db.Model):
     def getFriends(cls, username):
         friends = []
         if username not in (None, ''):
-            user = User.getUser(username)
+            user = User.getByUsername(username)
             query = cls.gql('WHERE user = :1 ORDER by confirmed, friend', user)
             for f in query:
                 friends.append(f)
@@ -187,8 +192,8 @@ class Friend(db.Model):
     
     @classmethod
     def alreadyFriends(cls, username, friendname):
-        user = User.getUser(username)
-        friend = User.getUser(friendname)
+        user = User.getByUsername(username)
+        friend = User.getByUsername(friendname)
         
         query = cls.gql('WHERE user = :1 AND friend = :2', user, friend)
 
@@ -215,7 +220,7 @@ class Ride(db.Model):
     
     @classmethod
     def getCreatedRides(cls, username):
-        user = User.getUser(username)
+        user = User.getByUsername(username)
         query = cls.gql('WHERE creator = :1', user)
         rides = []
         for ride in query:
@@ -240,6 +245,6 @@ class Location(db.Model):
     @classmethod
     def getListForUser(cls, username):
         if username not in (None, ''):
-            user = User.getUser(username)
+            user = User.getByUsername(username)
             query = cls.gql('WHERE user = :1 ORDER BY tm DESC LIMIT 100', user)
             return query

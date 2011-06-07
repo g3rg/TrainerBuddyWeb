@@ -232,7 +232,7 @@ class LodgeUserLocation(AbstractPage):
             if lg in (None,'') or lt in (None, '') or tm in (None, ''):
                 self.showLodgeLocationPage(lg,lt,tm,None,msg='Please enter all information')
             else:
-                user = datastore.User.getUser(self.username)
+                user = datastore.User.getByUsername(self.username)
                 loc = datastore.Location(username=user,lg=lg,lt=lt,tm=tm,srvTm=srvTm)
                 loc.save()
                 self.showLodgeLocationPage(lg=lg, lt=lt, tm=tm, srvTm=srvTm, msg='Lodged Successfully')
@@ -259,20 +259,24 @@ class EditGroupPage(AbstractPage):
             groupName = self.request.get('gp')
             group = datastore.Group.getGroup(groupName)
             friends = datastore.Friend.getFriends(self.username)
+            friendsX = [friend for friend in friends if friend.key() not in group.members ]
+            f = friends[0]
+            logging.info(f.key() not in group.members)
+            
             members = group.getMembers()
             invitees = group.getInvitees()
             template_values = {
                 'group' : group,
                 'members' : members,
                 'invitees' : invitees,
-                'friends': friends
+                'friends': friendsX
             }
             self.servePage(template_values, 'group')
         else:
             self.redirect('/user/login', False)
 
     def invite(self, group, friendKey):
-        selectedUser = datastore.User.get([friendKey])[0]
+        selectedUser = datastore.User.getByKey(friendKey)
         
         if selectedUser and selectedUser.key() not in group.members and selectedUser.key() not in group.invitees:
             
@@ -325,7 +329,7 @@ class EditGroupsPage(AbstractPage):
         # find the group
         group = datastore.Group.getGroup(selectedGroup)
         username = self.username
-        user = datastore.User.getUser(username)
+        user = datastore.User.getByUsername(username)
          
         if user.key() in group.invitees:
             if not user.key() in group.members:
@@ -354,8 +358,8 @@ class EditGroupsPage(AbstractPage):
                     logging.info('Group exists')
                     msg = 'Group ' + newGroup + ' already exists'
                 else:
-                    group = datastore.Group(groupName=newGroup, owner=datastore.User.getUser(self.username))
-                    user = datastore.User.getUser(self.username)
+                    group = datastore.Group(groupName=newGroup, owner=datastore.User.getByUsername(self.username))
+                    user = datastore.User.getByUsername(self.username)
                     group.members.append(user.key())
                     group.save()
 
@@ -419,8 +423,8 @@ class EditFriendsPage(AbstractPage):
                     logging.info('Friend exists')
                     # check to see if already friends
                     if not datastore.Friend.alreadyFriends(self.username, newFriend):
-                        user = datastore.User.getUser(self.username)
-                        friendUser = datastore.User.getUser(newFriend)
+                        user = datastore.User.getByUsername(self.username)
+                        friendUser = datastore.User.getByUsername(newFriend)
                         friend = datastore.Friend(user=user, friend=friendUser, confirmed=True)
                         friend.save()
                         friend = datastore.Friend(user=friendUser, friend=user, confirmed=False)
@@ -467,7 +471,7 @@ class EditRidesPage(AbstractPage):
                 if datastore.Ride.exists(newRide):
                     msg = 'Ride with that name already exists'
                 else:
-                    ride = datastore.Ride(title=newRide,creator = datastore.User.getUser(self.username))
+                    ride = datastore.Ride(title=newRide,creator = datastore.User.getByUsername(self.username))
                     ride.save()
 
             createdRides = datastore.Ride.getCreatedRides(self.username)
@@ -620,7 +624,7 @@ class LodgeCurrentUserInfoJSON(AbstractJSON):
                         else:
                             locationsFailed.append(corrId)
                     else:
-                        user = datastore.User.getUser(self.username)
+                        user = datastore.User.getByUsername(self.username)
                         loc = datastore.Location(user=user,lg=lg,lt=lt,tm=tm,srvTm=srvTm,corrId=corrId)
                         loc.save()
                         if corrId in (None, ''):
