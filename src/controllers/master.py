@@ -340,6 +340,31 @@ class EditGroupsPage(AbstractPage):
             group.invitees.remove(user.key())
             group.save()
         
+        
+    def removeMe(self, selectedGroup):
+        logging.info("Removing " + self.username + " from " + selectedGroup)
+        group = datastore.Group.getGroup(selectedGroup)
+        username = self.username
+        user = datastore.User.getByUsername(username)
+        
+        if user.key() in group.members:
+            group.members.remove(user.key())
+            if not user.key() in group.invitees:
+                group.invitees.append(user.key())
+                
+            group.save()
+
+    def ignore(self, selectedGroup):
+        logging.info(self.username + " is ignoring invite to " + selectedGroup)
+        group = datastore.Group.getGroup(selectedGroup)
+        username = self.username
+        user = datastore.User.getByUsername(username)
+        
+        if user.key() not in group.members and user.key() in group.invitees:
+            group.invitees.remove(user.key())
+            
+        group.save()
+            
                 
     def post(self):
         self.setAuthVariables()
@@ -352,7 +377,7 @@ class EditGroupsPage(AbstractPage):
             
             msg = ''
             if subaction not in (None, ''):
-                {'confirm':self.confirm}[subaction](selectedGroup)
+                {'confirm':self.confirm, 'removeMe':self.removeMe, 'ignore':self.ignore}[subaction](selectedGroup)
                 logging.info('Handle subaction ' + subaction)
             elif newGroup not in (None, ''):
                 logging.info('Creating New Group')

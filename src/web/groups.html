@@ -14,6 +14,18 @@
     $("theForm").submit();
   }
   
+  function removeMe(group) {
+    $("subaction").value = 'removeMe';
+    $("selectedGroup").value = group;
+    $("theForm").submit();	  
+  }
+  
+  function ignore(group) {
+    $("subaction").value = 'ignore';
+    $("selectedGroup").value = group;
+    $("theForm").submit();	  
+  }
+  
   </script>
 </head>
 <body>
@@ -35,7 +47,7 @@
     <ul>
     {% if groups %}
     {% for group in groups %}
-    <li>{{group.groupName}}</li>
+    <li><a href="javascript:removeMe('{{group.groupName}}')">{{group.groupName}}</a></li>
     {% endfor %}
     {% endif %}
     </ul>
@@ -43,7 +55,8 @@
     <ul>
     {% if inviteGroups %}
     {% for group in inviteGroups %}
-    <li><a href="javascript:confirm('{{group.groupName}}')">{{group.groupName}}</a></li>
+    <li>{{group.groupName}}&nbsp;<a href="javascript:confirm('{{group.groupName}}')">Accept</a>&nbsp;
+    	<a href="javascript:ignore('{{group.groupName}}')">Ignore</a></li>
     {% endfor %}
     {% endif %}
     </ul>

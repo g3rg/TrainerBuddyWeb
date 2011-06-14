@@ -35,8 +35,10 @@ TrainerBuddyWEB
 [x] update controller and pages to handle ReferenceProperty and lists of db.key changes
 
 [x] filter friend list on group page if already in group or invited
-[ ] remove myself from group? move back to invited?
+[x] remove myself from group? move back to invited?
+[x] remove myself from invited?
 [ ] as group owner, remove someone else from the group
+
 
 [ ] create a ride
 [ ] edit ride - date / description
