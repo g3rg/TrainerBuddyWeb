@@ -285,6 +285,20 @@ class EditGroupPage(AbstractPage):
             group.invitees.append(selectedUser.key())
             group.save()
 
+    def uninvite(self, group, friendKey):
+        logging.info('Uninviting ' + friendKey + ' from ' + group.groupName)
+        selectedUser = datastore.User.getByKey(friendKey)
+        if selectedUser and selectedUser.key() not in group.members and selectedUser.key() in group.invitees:
+            group.invitees.remove(selectedUser.key())
+            group.save()
+
+    def remove(self, group, friendKey):
+        logging.info('Removing ' + friendKey + ' from ' + group.groupName)
+        selectedUser = datastore.User.getByKey(friendKey)
+        if selectedUser and selectedUser.key() in group.members:
+            group.members.remove(selectedUser.key())
+            group.save()
+
     def post(self):
         self.setAuthVariables()
         if self.isUserAuthorised():
@@ -295,14 +309,22 @@ class EditGroupPage(AbstractPage):
             group = datastore.Group.getGroup(groupName)
             
             if subaction not in (None, ''):
-                {'invite':self.invite}[subaction](group, selectedFriend);
-            
+                {'invite':self.invite, 'uninvite':self.uninvite, 'remove':self.remove}[subaction](group, selectedFriend);
 
-            friends = datastore.Friend.getFriends(self.username)
+            members = group.getMembers()
+            memberKeys = [member.key() for member in members]
+            invitees = group.getInvitees()
+            inviteeKeys = [invitee.key() for invitee in invitees]
+            logging.info("test")
+            friends = [friend.friend for friend in datastore.Friend.getFriends(self.username)
+                       if friend.friend.key() not in memberKeys and friend.friend.key() not in inviteeKeys]
+
             template_values = {
                 'group' : group,
-                'friends' : friends
-            }
+                'members' : members,
+                'invitees' : invitees,
+                'friends': friends
+            }            
             
             self.servePage(template_values, 'group')
         else:

@@ -37,9 +37,9 @@ TrainerBuddyWEB
 [x] filter friend list on group page if already in group or invited
 [x] remove myself from group? move back to invited?
 [x] remove myself from invited?
-[ ] as group owner, remove someone else from the group
-
-
+[x] as group owner, cancel an invitation to the group
+[x] as group owner, remove someone else from the group
+	
 [ ] create a ride
 [ ] edit ride - date / description
 [ ] invite people to a ride
@@ -51,7 +51,18 @@ TrainerBuddyWEB
 [ ] list who's coming on a ride
 [ ] comment on ride
 
+
 [ ] validate email address
+	[ ] looks like a valid email address
+	[ ] email a link for confirmation of email address
+	[ ] handle link to activate account
+
+[ ] as group owner, hand over ownership to another user?
+[ ] suggest a friend to the group owner to add them?
+[ ] prevent unfriending if a member of the group?
+ 
+[ ] message another user
+
 [ ] email alerts for invites, cancelations or rider list at x-time before ride starts
 [ ] list friends, view their locations
 [ ] change token to be valid for x amount of time?
@@ -71,7 +82,7 @@ TrainerBuddyAgent (Android)
 TBWeb
 -----
 [ ] heart rate!
-
+[ ] allow others to administer a group
 
 TBA
 ---

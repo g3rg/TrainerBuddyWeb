@@ -7,12 +7,13 @@
   function $(id){
     return document.getElementById(id);
   }
-  
-  function invite(friend) {
-	$("subaction").value = 'invite';
+
+  function submitPage(friend, action) {
+	$("subaction").value = action;
 	$("selectedFriend").value = friend;
 	$("theForm").submit();
-  }
+  }  
+  
   
   </script>
 </head>
@@ -28,7 +29,7 @@
     <ul>
     {% if members %}
     {% for friend in members %}
-    <li>{{friend.username}}</li>
+    <li>{{friend.username}}&nbsp;<a href="javascript:submitPage('{{friend.key}}', 'remove')">Remove</a></li>
     {% endfor %}
     {% endif %}
     </ul>
@@ -36,14 +37,14 @@
     <ul>
     {% if invitees %}
     {% for friend in invitees %}
-    <li>{{friend.username}}</li>
+    <li>{{friend.username}}&nbsp;<a href="javascript:submitPage('{{friend.key}}','uninvite')">Cancel Invitation</a></li>
     {% endfor %}
     {% endif %}
     </ul>    
     <br/>
-    Invite these friends to the group?<br/>
+    Invite a friend to the group?<br/>
     {% for friend in friends %}
-    <li><a href="javascript:invite('{{friend.key}}')">{{friend.username}}</a></li>
+    <li><a href="javascript:submitPage('{{friend.key}}', 'invite')">{{friend.username}}</a></li>
     {% endfor %}
     <input name="subaction" id="subaction" value="" type="hidden"/>
     <input name="selectedFriend" id="selectedFriend" value="" type="hidden"/>
