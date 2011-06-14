@@ -66,9 +66,7 @@ class Group(db.Model):
             inviteeList.append(invitee)
             
         return inviteeList
-        
-        
-    
+   
     @classmethod
     def getGroup(cls, groupName):
         query = cls.gql('WHERE groupName = :1', groupName)

@@ -43,7 +43,7 @@
     <br/>
     Invite these friends to the group?<br/>
     {% for friend in friends %}
-    <li><a href="javascript:invite('{{friend.friend.key}}')">{{friend.friend.username}}</a></li>
+    <li><a href="javascript:invite('{{friend.key}}')">{{friend.username}}</a></li>
     {% endfor %}
     <input name="subaction" id="subaction" value="" type="hidden"/>
     <input name="selectedFriend" id="selectedFriend" value="" type="hidden"/>

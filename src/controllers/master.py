@@ -258,18 +258,20 @@ class EditGroupPage(AbstractPage):
         if self.isUserAuthorised():
             groupName = self.request.get('gp')
             group = datastore.Group.getGroup(groupName)
-            friends = datastore.Friend.getFriends(self.username)
-            friendsX = [friend for friend in friends if friend.key() not in group.members ]
-            f = friends[0]
-            logging.info(f.key() not in group.members)
             
             members = group.getMembers()
+            memberKeys = [member.key() for member in members]
             invitees = group.getInvitees()
+            inviteeKeys = [invitee.key() for invitee in invitees]
+            logging.info("test")
+            friends = [friend.friend for friend in datastore.Friend.getFriends(self.username)
+                       if friend.friend.key() not in memberKeys and friend.friend.key() not in inviteeKeys]
+
             template_values = {
                 'group' : group,
                 'members' : members,
                 'invitees' : invitees,
-                'friends': friendsX
+                'friends': friends
             }
             self.servePage(template_values, 'group')
         else:
