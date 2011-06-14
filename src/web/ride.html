@@ -1,0 +1,35 @@
+<html>
+<head>
+  <title>Ride</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+  <script language="javascript">
+  
+  function $(id){
+    return document.getElementById(id);
+  }
+
+  function submitPage(rider, action) {
+	$("subaction").value = action;
+	$("selectedRider").value = rider;
+	$("theForm").submit();
+  }  
+  
+  
+  </script>
+</head>
+<body>
+  <div>
+    {% if failReason %}
+    {{failReason}}<br/>
+    {% endif %}
+        
+    Ride: {{ride.title}}<br/>
+    <form method="post" action="group" name="theForm" id="theForm">
+    <input name="subaction" id="subaction" value="" type="hidden"/>
+    <input name="selectedRider" id="selectedRider" value="" type="hidden"/>
+    <input name="rd" id="rd" value="{{rideKey}}" type="hidden"/>
+	</form>
+  </div>
+
+</body>
+</html>

@@ -493,6 +493,21 @@ class EditFriendsPage(AbstractPage):
         else:
             self.redirect('/user/login', False)       
     
+class EditRidePage(AbstractPage):
+    def get(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            rideKey = self.request.get('rd')
+            ride = datastore.Ride.get_by_id(rideKey, None)
+            
+            template_values = {
+                'ride' : ride,
+                'rideKey' : rideKey            
+            }
+            self.servePage(template_values, 'ride')
+        else:
+            self.redirect('/user/login', False)
+    
 class EditRidesPage(AbstractPage):
     def get(self):
         self.setAuthVariables()
@@ -709,6 +724,7 @@ def main():
         ('/user/groups', EditGroupsPage),
         ('/user/group', EditGroupPage),
         ('/user/rides', EditRidesPage),
+        ('/user/ride', EditRidePage),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)

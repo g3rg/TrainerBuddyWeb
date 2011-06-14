@@ -60,7 +60,7 @@ TrainerBuddyWEB
 [ ] as group owner, hand over ownership to another user?
 [ ] suggest a friend to the group owner to add them?
 [ ] prevent unfriending if a member of the group?
- 
+[ ] change username
 [ ] message another user
 
 [ ] email alerts for invites, cancelations or rider list at x-time before ride starts
