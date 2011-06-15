@@ -508,7 +508,7 @@ class EditRidePage(AbstractPage):
                 ridetime = ''
             
             friends = [friend.friend for friend in datastore.Friend.getFriends(self.username)
-                       if friend.friend not in ride.getRiders()]
+                      if friend.friend.key() not in [user.key() for user in ride.getRiders()]]
             
             participants = ride.riders
             
@@ -528,7 +528,7 @@ class EditRidePage(AbstractPage):
     def invite(self, ride, friendKey):
         selectedUser = datastore.User.getByKey(friendKey)
         
-        if selectedUser and selectedUser not in ride.getRiders():
+        if selectedUser and selectedUser.key() not in [user.key() for user in ride.getRiders()]:
             logging.info('Inviting ' + selectedUser.username + ' to ' + ride.title)
             rider = datastore.RideParticipant(ride=ride,user=selectedUser,status=datastore.STATUS_INVITED)
             rider.save()
@@ -573,11 +573,11 @@ class EditRidePage(AbstractPage):
                 
                 ride.save()
                 
-                        
             friends = [friend.friend for friend in datastore.Friend.getFriends(self.username)
-                       if friend.friend.key() not in ride.riders]
+                       if friend.friend.key() not in 
+                       [user.key() for user in ride.getRiders()]]
             
-            participants = ride.getRiders()
+            participants = ride.riders
             
             template_values = {
                 'ride' : ride,

@@ -42,7 +42,11 @@ TrainerBuddyWEB
 	
 [x] create a ride
 [x] edit ride - date / description
-[ ] invite people to a ride
+[x] invite people to a ride
+    [x] remove participants from friend list
+    [x] prevent double invitiation
+[ ] uninvite people from ride
+  
 [ ] accept invite from other rider
 [ ] reject invite from other rider
 [ ] list who's coming on a ride
