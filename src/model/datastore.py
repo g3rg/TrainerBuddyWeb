@@ -197,7 +197,6 @@ class Friend(db.Model):
 
         return query.count(1) > 0
 
-
 class RideComment(db.Model):
     date = db.DateTimeProperty(default=datetime.datetime.today())
     user = db.ReferenceProperty(reference_class=User)
@@ -205,13 +204,13 @@ class RideComment(db.Model):
 
 class Ride(db.Model):
     title = db.StringProperty(required=True)
-    description = db.StringProperty()
+    description = db.StringProperty(default='')
     #http://code.google.com/appengine/docs/python/datastore/typesandpropertyclasses.html#ReferenceProperty
     creator = db.ReferenceProperty(reference_class=User)
     date = db.DateTimeProperty()
     
     # TODO Add this as lists of keys into datastore.User
-    #undecided = db.StringListProperty()
+    undecided = db.ListProperty(db.Key)
     #confirmed = db.StringListProperty()
     #rejected = db.StringListProperty()
     #comments = db.ListProperty(db.Key)
@@ -230,6 +229,15 @@ class Ride(db.Model):
         if ridename not in (None, ''):
             query = cls.gql('WHERE title = :1', ridename)
             return query.get() != None    
+
+    @classmethod
+    def existsForCreator(cls, ridename, username):
+        if ridename not in (None, ''):
+            user = User.getByUsername(username)
+            query = cls.gql('WHERE creator = :1 AND title = :2', user, ridename)
+            
+            result = query.get()
+            return result != None
 
 class Location(db.Model):
     user = db.ReferenceProperty(reference_class=User,required=True)

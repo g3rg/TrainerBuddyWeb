@@ -21,7 +21,7 @@
     <ul>
     {% if createdRides %}
     {% for ride in createdRides %}
-    <li><a href="ride?rd={{ride.key.id}}">{{ride.title}}</a></li>
+    <li><a href="ride?rd={{ride.key}}">{{ride.title}}</a></li>
     {% endfor %}
     {% endif %}
     </ul>

@@ -40,8 +40,8 @@ TrainerBuddyWEB
 [x] as group owner, cancel an invitation to the group
 [x] as group owner, remove someone else from the group
 	
-[ ] create a ride
-[ ] edit ride - date / description
+[x] create a ride
+[x] edit ride - date / description
 [ ] invite people to a ride
 	[ ] group
 	[ ] individual
@@ -49,27 +49,31 @@ TrainerBuddyWEB
 [ ] accept invite from other rider
 [ ] reject invite from other rider
 [ ] list who's coming on a ride
-[ ] comment on ride
-
 
 [ ] validate email address
 	[ ] looks like a valid email address
 	[ ] email a link for confirmation of email address
 	[ ] handle link to activate account
+[ ] FIX UI!
+	[ ] menu
+	[ ] test on iphone, android browser, IE, chrome, firefox
 
-[ ] as group owner, hand over ownership to another user?
+
+
+[ ] comment on ride
+[ ] ring fencing of editing / viewing ????
+[ ] sanity checking of fields! fail nicely!
 [ ] suggest a friend to the group owner to add them?
 [ ] prevent unfriending if a member of the group?
+[ ] as group owner, hand over ownership to another user?
 [ ] change username
 [ ] message another user
-
 [ ] email alerts for invites, cancelations or rider list at x-time before ride starts
 [ ] list friends, view their locations
 [ ] change token to be valid for x amount of time?
 [ ] recurring rides? 'copy ride' link?
 [ ] password reset!
 
-[ ] FIX UI!
 
 TrainerBuddyAgent (Android)
 -----------------

@@ -498,12 +498,88 @@ class EditRidePage(AbstractPage):
         self.setAuthVariables()
         if self.isUserAuthorised():
             rideKey = self.request.get('rd')
-            ride = datastore.Ride.get_by_id(rideKey, None)
+            ride = datastore.Ride.get([rideKey])[0]
+
+            if ride.date:
+                ridedate = ride.date.date()
+                ridetime = ride.date.time() 
+            else:
+                ridedate = ''
+                ridetime = ''
+            
+            undecided = ride.undecided
+
+            undecidedKeys = [member for member in undecided]
+            
+            friends = [friend.friend for friend in datastore.Friend.getFriends(self.username)
+                       if friend.friend.key() not in undecidedKeys]
             
             template_values = {
                 'ride' : ride,
-                'rideKey' : rideKey            
+                'rideKey' : rideKey,
+                'ridedate' : ridedate,
+                'ridetime' : ridetime,
+                'undecided' : undecided,
+                'friends' : friends
             }
+            self.servePage(template_values, 'ride')
+        else:
+            self.redirect('/user/login', False)
+    
+    def invite(self, ride, friendKey):
+        selectedUser = datastore.User.getByKey(friendKey)
+        
+        if selectedUser and selectedUser.key() not in ride.undecided:
+            ride.undecided.append(selectedUser.key())
+            ride.save()
+    
+    def uninvite(self, ride, selectedFriend):
+        logging.info('Uninviting ' + selectedFriend.name + ' ' + ride.title)
+    
+    def post(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            rideKey = self.request.get('rd')
+            ride = datastore.Ride.get([rideKey])[0]
+            subaction = self.request.get('subaction')
+            selectedFriend = self.request.get('selectedFriend')
+            
+            if subaction not in (None, ''):
+                {'invite':self.invite, 'uninvite':self.uninvite}[subaction](ride, selectedFriend);
+            else :
+                title = self.request.get('title')
+                description = self.request.get('description')
+                dt = self.request.get('date')
+                tm = self.request.get('time')
+                
+                ride.title = title
+                ride.description = description
+                if (dt and tm):
+                    ride.date = datetime.datetime.strptime(dt + 'T' + tm, '%Y-%m-%dT%H:%M:%S')
+                    ridedate = dt
+                    ridetime = tm
+                else:
+                    ridedate = ''
+                    ridetime = ''
+                
+                ride.save()
+                
+            undecided = ride.undecided
+
+            undecidedKeys = [member for member in undecided]
+            
+            friends = [friend.friend for friend in datastore.Friend.getFriends(self.username)
+                       if friend.friend.key() not in undecidedKeys]
+            
+            template_values = {
+                'ride' : ride,
+                'rideKey' : rideKey,
+                'ridedate' : ridedate,
+                'ridetime' : ridetime,
+                'undecided' : undecided,
+                'friends' : friends
+            }
+            
             self.servePage(template_values, 'ride')
         else:
             self.redirect('/user/login', False)
@@ -532,7 +608,8 @@ class EditRidesPage(AbstractPage):
             if subaction not in (None, ''):
                 {}[subaction]();
             elif newRide not in (None, ''):
-                if datastore.Ride.exists(newRide):
+                #if datastore.Ride.exists(newRide):
+                if datastore.Ride.existsForCreator(newRide, self.username):
                     msg = 'Ride with that name already exists'
                 else:
                     ride = datastore.Ride(title=newRide,creator = datastore.User.getByUsername(self.username))
@@ -584,7 +661,7 @@ class DataDumpPage(AbstractPage):
         rides = datastore.Ride.all()
         rideList = []
         for ride in rides:
-            ridestr = ride.title + ' - ' + ride.creator.username
+            ridestr = ride.title + ' - ' + ride.creator.username + ' - ' + ride.description
             rideList.append(ridestr)
 
         template_values = {

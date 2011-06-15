@@ -7,13 +7,12 @@
   function $(id){
     return document.getElementById(id);
   }
-
-  function submitPage(rider, action) {
-	$("subaction").value = action;
-	$("selectedRider").value = rider;
-	$("theForm").submit();
-  }  
   
+  function submitPage(friend, action) {
+	$("subaction").value = action;
+	$("selectedFriend").value = friend;
+	$("theForm").submit();
+  }
   
   </script>
 </head>
@@ -22,12 +21,63 @@
     {% if failReason %}
     {{failReason}}<br/>
     {% endif %}
+    <!-- {{ride.date}} -->
+    
+    <form method="post" action="ride" name="theForm" id="theForm">
+    <p>
+      <label for="title">Title:</label>
+      <input type="text" name="title" id="title" value="{{ride.title}}"/>
+    </p>
+    <p>
+      <label for="description">Description:</label>
+      <textarea name="description" id="description">{{ride.description}}</textarea>
+    </p>    
+    <p>
+      <label for="date">Date: (%Y-%m-%d)</label>
+      <input type="text" name="date" id="date" value="{{ridedate}}"/>
+    </p>
+    <p>
+      <label for="time">Time: (%H:%M:%S)</label>
+      <input type="text" name="time" id="time" value="{{ridetime}}"/>
+    </p>
+    <p>
+    Accepted:<br/>
+    <ul>
+    </ul>
+    </p>
+    <p>
+    Declined:<br/>
+    <ul>
+    </ul>
+    </p>
+    <p>
+    Invited but undecided:<br/>
+    <ul>
+    {% if undecided %}
+    {% for friend in undecided %}
+    <li>{{friend.username}}&nbsp;<a href="javascript:submitPage('{{friend.key}}','uninvite')">Cancel Invitation</a></li>
+    {% endfor %}
+    {% endif %}    
+    </ul>
+    </p>
+    <p>
+    Invite these friends:<br/>
+    <ul>
+    {% if friends %}
+    {% for friend in friends %}
+    <li>{{friend.username}}&nbsp;<a href="javascript:submitPage('{{friend.key}}','invite')">Invite</a></li>
+    {% endfor %}
+    {% endif %}    
+    </ul>
+    </p>     
         
-    Ride: {{ride.title}}<br/>
-    <form method="post" action="group" name="theForm" id="theForm">
-    <input name="subaction" id="subaction" value="" type="hidden"/>
-    <input name="selectedRider" id="selectedRider" value="" type="hidden"/>
     <input name="rd" id="rd" value="{{rideKey}}" type="hidden"/>
+    <input name="subaction" id="subaction" value="" type="hidden"/>
+    <input name="selectedFriend" id="selectedFriend" value="" type="hidden"/>
+    <p>
+      <input name="action" value="Update" type="submit"
+             id="submit-update" />
+    </p>
 	</form>
   </div>
 
