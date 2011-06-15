@@ -8,6 +8,11 @@ import datetime
 
 from google.appengine.ext import db
 
+# Rider status constants
+STATUS_INVITED = 0
+STATUS_ACCEPTED = 1
+STATUS_REJECTED = 2
+
 class User(db.Model):
     username = db.StringProperty(required=True)
     email = db.EmailProperty(required=True)
@@ -41,7 +46,6 @@ class User(db.Model):
         if username not in (None, ''):
             query = cls.gql('WHERE username = :1', username)
             return query.get() != None
-    
 
 class Group(db.Model):
     groupName = db.StringProperty(required=True)
@@ -205,15 +209,12 @@ class RideComment(db.Model):
 class Ride(db.Model):
     title = db.StringProperty(required=True)
     description = db.StringProperty(default='')
-    #http://code.google.com/appengine/docs/python/datastore/typesandpropertyclasses.html#ReferenceProperty
     creator = db.ReferenceProperty(reference_class=User)
     date = db.DateTimeProperty()
-    
-    # TODO Add this as lists of keys into datastore.User
-    undecided = db.ListProperty(db.Key)
-    #confirmed = db.StringListProperty()
-    #rejected = db.StringListProperty()
-    #comments = db.ListProperty(db.Key)
+        
+    def getRiders(self):
+        riders = [rider.user for rider in self.riders]
+        return riders
     
     @classmethod
     def getCreatedRides(cls, username):
@@ -223,7 +224,7 @@ class Ride(db.Model):
         for ride in query:
             rides.append(ride)
         return rides
-    
+        
     @classmethod
     def exists(cls, ridename):
         if ridename not in (None, ''):
@@ -238,6 +239,12 @@ class Ride(db.Model):
             
             result = query.get()
             return result != None
+
+class RideParticipant(db.Model):
+    ride = db.ReferenceProperty(reference_class=Ride,collection_name="riders")
+    user = db.ReferenceProperty(reference_class=User)
+    status = db.IntegerProperty(default=STATUS_INVITED)
+
 
 class Location(db.Model):
     user = db.ReferenceProperty(reference_class=User,required=True)

@@ -16,8 +16,9 @@
     {{failReason}}<br/>
     {% endif %}
         
-    Rides you created:<br/>
+    
     <form method="post" action="rides" name="theForm" id="theForm">
+    Rides you created:<br/>
     <ul>
     {% if createdRides %}
     {% for ride in createdRides %}
@@ -25,6 +26,16 @@
     {% endfor %}
     {% endif %}
     </ul>
+    Rides you are invited on:<br/>
+    <ul>
+    {% if invitedRides %}
+    {% for ride in invitedRides %}
+    <li><a href="viewride?rd={{ride.key}}">{{ride.title}}</a></li>
+    {% endfor %}
+    {% endif %}
+    </ul>
+
+
     <p>
       <label for="ridename">Create a new Ride:</label>
       <input name="ridename" type="text" value="{{ridename}}" id="ridename"/>

@@ -507,31 +507,36 @@ class EditRidePage(AbstractPage):
                 ridedate = ''
                 ridetime = ''
             
-            undecided = ride.undecided
-
-            undecidedKeys = [member for member in undecided]
-            
             friends = [friend.friend for friend in datastore.Friend.getFriends(self.username)
-                       if friend.friend.key() not in undecidedKeys]
+                       if friend.friend not in ride.getRiders()]
+            
+            participants = ride.riders
             
             template_values = {
                 'ride' : ride,
                 'rideKey' : rideKey,
                 'ridedate' : ridedate,
                 'ridetime' : ridetime,
-                'undecided' : undecided,
-                'friends' : friends
+                'friends' : friends,
+                'participants' : participants
             }
             self.servePage(template_values, 'ride')
         else:
             self.redirect('/user/login', False)
-    
+
+
     def invite(self, ride, friendKey):
         selectedUser = datastore.User.getByKey(friendKey)
         
-        if selectedUser and selectedUser.key() not in ride.undecided:
-            ride.undecided.append(selectedUser.key())
-            ride.save()
+        if selectedUser and selectedUser not in ride.getRiders():
+            logging.info('Inviting ' + selectedUser.username + ' to ' + ride.title)
+            rider = datastore.RideParticipant(ride=ride,user=selectedUser,status=datastore.STATUS_INVITED)
+            rider.save()
+            
+                        
+        #if selectedUser and selectedUser.key() not in ride.undecided:
+        #    ride.undecided.append(selectedUser.key())
+        #    ride.save()
     
     def uninvite(self, ride, selectedFriend):
         logging.info('Uninviting ' + selectedFriend.name + ' ' + ride.title)
@@ -543,6 +548,13 @@ class EditRidePage(AbstractPage):
             ride = datastore.Ride.get([rideKey])[0]
             subaction = self.request.get('subaction')
             selectedFriend = self.request.get('selectedFriend')
+            
+            if ride.date:
+                ridedate = ride.date.date()
+                ridetime = ride.date.time() 
+            else:
+                ridedate = ''
+                ridetime = ''            
             
             if subaction not in (None, ''):
                 {'invite':self.invite, 'uninvite':self.uninvite}[subaction](ride, selectedFriend);
@@ -558,40 +570,39 @@ class EditRidePage(AbstractPage):
                     ride.date = datetime.datetime.strptime(dt + 'T' + tm, '%Y-%m-%dT%H:%M:%S')
                     ridedate = dt
                     ridetime = tm
-                else:
-                    ridedate = ''
-                    ridetime = ''
                 
                 ride.save()
                 
-            undecided = ride.undecided
-
-            undecidedKeys = [member for member in undecided]
-            
+                        
             friends = [friend.friend for friend in datastore.Friend.getFriends(self.username)
-                       if friend.friend.key() not in undecidedKeys]
+                       if friend.friend.key() not in ride.riders]
+            
+            participants = ride.getRiders()
             
             template_values = {
                 'ride' : ride,
                 'rideKey' : rideKey,
                 'ridedate' : ridedate,
                 'ridetime' : ridetime,
-                'undecided' : undecided,
-                'friends' : friends
+                'friends' : friends,
+                'participants' : participants
             }
             
             self.servePage(template_values, 'ride')
         else:
             self.redirect('/user/login', False)
     
+    
 class EditRidesPage(AbstractPage):
     def get(self):
         self.setAuthVariables()
         if self.isUserAuthorised():
             createdRides = datastore.Ride.getCreatedRides(self.username)
+            # invitedRides = datastore.Ride.getInvitedRides(self.username)
             
             template_values = {
                 'createdRides' : createdRides
+             #   'invitedRides' : invitedRides
             }
             self.servePage(template_values, 'rides')
         else:

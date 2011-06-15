@@ -43,9 +43,6 @@ TrainerBuddyWEB
 [x] create a ride
 [x] edit ride - date / description
 [ ] invite people to a ride
-	[ ] group
-	[ ] individual
-[ ] show invites on groups page
 [ ] accept invite from other rider
 [ ] reject invite from other rider
 [ ] list who's coming on a ride
@@ -73,6 +70,7 @@ TrainerBuddyWEB
 [ ] change token to be valid for x amount of time?
 [ ] recurring rides? 'copy ride' link?
 [ ] password reset!
+[ ] allow ride planning based on 'groups'? treat 'groups' as lists of friends or something bigger?
 
 
 TrainerBuddyAgent (Android)

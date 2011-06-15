@@ -41,21 +41,11 @@
       <input type="text" name="time" id="time" value="{{ridetime}}"/>
     </p>
     <p>
-    Accepted:<br/>
+    Riders:<br/>
     <ul>
-    </ul>
-    </p>
-    <p>
-    Declined:<br/>
-    <ul>
-    </ul>
-    </p>
-    <p>
-    Invited but undecided:<br/>
-    <ul>
-    {% if undecided %}
-    {% for friend in undecided %}
-    <li>{{friend.username}}&nbsp;<a href="javascript:submitPage('{{friend.key}}','uninvite')">Cancel Invitation</a></li>
+    {% if participants %}
+    {% for rider in participants %}
+    <li>{{rider.user.username}}&nbsp;<a href="javascript:submitPage('{{rider.user.key}}','uninvite')">Cancel Invitation</a></li>
     {% endfor %}
     {% endif %}    
     </ul>
