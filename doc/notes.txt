@@ -52,17 +52,17 @@ TrainerBuddyWEB
 [x] accept invite from other rider
 [x] reject invite from other rider
 
-[ ] validate email address
-	[ ] looks like a valid email address
-	[ ] email a link for confirmation of email address
-	[ ] handle link to activate account
+[ ] add comments on ride
+[ ] steak holders
 [ ] FIX UI!
 	[ ] menu
 	[ ] test on iphone, android browser, IE, chrome, firefox
 
+[ ] validate email address
+	[ ] looks like a valid email address
+	[ ] email a link for confirmation of email address
+	[ ] handle link to activate account
 
-
-[ ] add comments on ride
 [ ] ring fencing of editing / viewing ????
 [ ] sanity checking of fields! fail nicely!
 [ ] suggest a friend to the group owner to add them?
