@@ -55,7 +55,13 @@ TrainerBuddyWEB
 [x] add comments on ride
 [ ] FIX UI!
 	[ ] menu
-	[ ] test on iphone, android browser, IE, chrome, firefox
+	[ ] create page
+	[ ] login page
+	[ ] friends page
+	[ ] rides page
+	[ ] edit ride page
+	[ ] view ride page
+	[ ] groups?
 
 [ ] validate email address
 	[ ] looks like a valid email address
