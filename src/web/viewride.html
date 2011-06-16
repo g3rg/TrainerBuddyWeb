@@ -43,6 +43,19 @@
     <input name="rd" id="rd" value="{{ride.key}}" type="hidden"/>
     <input name="sts" id="sts" value="" type="hidden"/>
 	</form>
+	<br/>
+	<form method="post" action="ridecomment" name="commentForm" id="commentForm">
+    <p>
+      <label for="comment">Comment:</label>
+      <textarea name="comment" id="comment"></textarea>
+    </p>
+    <input name="rd" id="rd" value="{{ride.key}}" type="hidden"/>
+    <input name="page" id="page" value="viewride" type="hidden"/>    
+    <p>
+      <input name="action" value="Comment" type="submit"
+             id="submit-comment" />
+    </p>
+	</form>
   </div>
 
 </body>

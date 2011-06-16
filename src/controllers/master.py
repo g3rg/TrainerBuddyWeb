@@ -590,7 +590,25 @@ class EditRidePage(AbstractPage):
             self.servePage(template_values, 'ride')
         else:
             self.redirect('/user/login', False)
-   
+
+class RideCommentPage(AbstractPage):
+    def post(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            rd = self.request.get('rd')
+            pg = self.request.get('page')
+            
+            logging.info('COMMENTING!!')
+            if pg == 'ride':
+                fwdPage = 'ride'
+            else:
+                fwdPage = 'viewride'
+                
+            self.redirect('/user/' + fwdPage, False)
+        else:
+            self.redirect('/user/login', False)
+        
+
 class ViewRidePage(AbstractPage):
     
     def getTemplateVars(self, ride):
@@ -631,7 +649,6 @@ class ViewRidePage(AbstractPage):
         else:
             self.redirect('/user/login', False)
             
-    
     def post(self):
         self.setAuthVariables()
         if self.isUserAuthorised():
@@ -879,6 +896,7 @@ def main():
         ('/user/rides', EditRidesPage),
         ('/user/ride', EditRidePage),
         ('/user/viewride', ViewRidePage),
+        ('/user/ridecomment', RideCommentPage),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)

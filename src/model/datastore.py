@@ -201,11 +201,6 @@ class Friend(db.Model):
 
         return query.count(1) > 0
 
-class RideComment(db.Model):
-    date = db.DateTimeProperty(default=datetime.datetime.today())
-    user = db.ReferenceProperty(reference_class=User)
-    comment = db.StringProperty()
-
 class Ride(db.Model):
     title = db.StringProperty(required=True)
     description = db.StringProperty(default='')
@@ -254,7 +249,6 @@ class Ride(db.Model):
             result = query.get()
             return result != None
 
-
 class RideParticipant(db.Model):
     ride = db.ReferenceProperty(reference_class=Ride,collection_name="riders")
     user = db.ReferenceProperty(reference_class=User)
@@ -262,6 +256,12 @@ class RideParticipant(db.Model):
 
     def statusdisplay(self):
         return {STATUS_INVITED:'invited',STATUS_ACCEPTED:'accepted',STATUS_REJECTED:'rejected'}[self.status];
+
+class RideComment(db.Model):
+    ride = db.ReferenceProperty(reference_class=Ride, collection_name="comments")
+    date = db.DateTimeProperty(default=datetime.datetime.today())
+    user = db.ReferenceProperty(reference_class=User)
+    comment = db.StringProperty()
 
 class Location(db.Model):
     user = db.ReferenceProperty(reference_class=User,required=True)
