@@ -216,6 +216,11 @@ class Ride(db.Model):
         riders = [rider.user for rider in self.riders]
         return riders
     
+    def removeRider(self, user):
+        rideParticipant = [rider for rider in self.riders if rider.user.key() == user.key()]
+        if rideParticipant and len(rideParticipant) == 1:
+            rideParticipant[0].delete()
+    
     @classmethod
     def getCreatedRides(cls, username):
         user = User.getByUsername(username)
@@ -239,6 +244,7 @@ class Ride(db.Model):
             
             result = query.get()
             return result != None
+
 
 class RideParticipant(db.Model):
     ride = db.ReferenceProperty(reference_class=Ride,collection_name="riders")

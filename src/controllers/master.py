@@ -538,8 +538,12 @@ class EditRidePage(AbstractPage):
         #    ride.undecided.append(selectedUser.key())
         #    ride.save()
     
-    def uninvite(self, ride, selectedFriend):
-        logging.info('Uninviting ' + selectedFriend.name + ' ' + ride.title)
+    def uninvite(self, ride, friendKey):
+        selectedUser = datastore.User.getByKey(friendKey)
+        
+        if selectedUser and selectedUser.key() in [user.key() for user in ride.getRiders()]:
+            logging.info('Uninviting ' + selectedUser.username + ' ' + ride.title)
+            ride.removeRider(selectedUser)
     
     def post(self):
         self.setAuthVariables()

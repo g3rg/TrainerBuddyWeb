@@ -45,7 +45,7 @@ TrainerBuddyWEB
 [x] invite people to a ride
     [x] remove participants from friend list
     [x] prevent double invitiation
-[ ] uninvite people from ride
+[x] uninvite people from ride
   
 [ ] accept invite from other rider
 [ ] reject invite from other rider
