@@ -8,9 +8,8 @@
     return document.getElementById(id);
   }
   
-  function submitPage(friend, action) {
-	$("subaction").value = action;
-	$("selectedFriend").value = friend;
+  function submitPage(action) {
+	$("sts").value = action;
 	$("theForm").submit();
   }
   
@@ -23,11 +22,15 @@
     {% endif %}
     <!-- {{ride.date}} -->
     
-    <form method="post" action="ride" name="theForm" id="theForm">
+    <form method="post" action="viewride" name="theForm" id="theForm">
     <p>Title:{{ride.title}}</p>
     <p>Description:{{ride.description}}</p>    
     <p>Date:{{ridedate}}</p>
     <p>Time:{{ridetime}}</p>
+    <p>Your Participation: {{rider.statusdisplay}}</p> 
+    <p><a href="javascript:submitPage({{STSINVITED}})">UNDECIDED</a>
+	   <a href="javascript:submitPage({{STSACCEPT}})">ACCEPTED</a>
+	   <a href="javascript:submitPage({{STSREJECT}})">REJECTED</a></p>
     <p>Riders:<br/>
     <ul>
     {% if participants %}
@@ -37,8 +40,8 @@
     {% endif %}    
     </ul>
     </p>
-    <input name="rd" id="rd" value="{{rideKey}}" type="hidden"/>
-    <input name="subaction" id="subaction" value="" type="hidden"/>
+    <input name="rd" id="rd" value="{{ride.key}}" type="hidden"/>
+    <input name="sts" id="sts" value="" type="hidden"/>
 	</form>
   </div>
 

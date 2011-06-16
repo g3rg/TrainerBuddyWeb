@@ -592,31 +592,69 @@ class EditRidePage(AbstractPage):
             self.redirect('/user/login', False)
    
 class ViewRidePage(AbstractPage):
+    
+    def getTemplateVars(self, ride):
+        user = datastore.User.getByUsername(self.username)
+        riderList = [rider for rider in ride.riders if rider.user.key() == user.key()]
+        rider = None
+
+        if riderList and len(riderList) == 1:
+            rider = riderList[0]
+                
+        if ride.date:
+            ridedate = ride.date.date()
+            ridetime = ride.date.time() 
+        else:
+            ridedate = ''
+            ridetime = ''                
+                
+        template_values = {
+            'ride' : ride,
+            'rider' : rider,
+            'participants' : ride.riders,
+            'ridedate' : ridedate,
+            'ridetime' : ridetime,
+            'STSINVITED' : datastore.STATUS_INVITED,
+            'STSACCEPT' : datastore.STATUS_ACCEPTED,
+            'STSREJECT' : datastore.STATUS_REJECTED                
+        }
+        
+        return template_values
+    
     def get(self):
         self.setAuthVariables()
         if self.isUserAuthorised():
             rideKey = self.request.get('rd')
             ride = datastore.Ride.get([rideKey])[0]
-            participants = ride.riders
-
-            if ride.date:
-                ridedate = ride.date.date()
-                ridetime = ride.date.time() 
-            else:
-                ridedate = ''
-                ridetime = ''
             
-            template_values = {
-                'ride' : ride,
-                'participants' : participants,
-                'ridedate' : ridedate,
-                'ridetime' : ridetime
-            }
-            
-            self.servePage(template_values, 'viewride')
+            self.servePage(self.getTemplateVars(ride), 'viewride')
         else:
             self.redirect('/user/login', False)
             
+    
+    def post(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            rideKey = self.request.get('rd')
+            ride = datastore.Ride.get([rideKey])[0]
+            
+            sts = self.request.get('sts')
+            if sts not in (None, ''):
+                logging.info('Change my status to ' + sts)
+                user = datastore.User.getByUsername(self.username)
+                riderList = [rider for rider in ride.riders if rider.user.key() == user.key()]
+                rider = None
+        
+                if riderList and len(riderList) == 1:
+                    rider = riderList[0]
+                    rider.status = int(sts)
+                    rider.save()     
+                
+                
+            
+            self.servePage(self.getTemplateVars(ride), 'viewride')
+        else:
+            self.redirect('/user/login', False)        
     
 class EditRidesPage(AbstractPage):
     def get(self):
