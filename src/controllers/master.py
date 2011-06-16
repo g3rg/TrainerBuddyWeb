@@ -591,24 +591,6 @@ class EditRidePage(AbstractPage):
         else:
             self.redirect('/user/login', False)
 
-class RideCommentPage(AbstractPage):
-    def post(self):
-        self.setAuthVariables()
-        if self.isUserAuthorised():
-            rd = self.request.get('rd')
-            pg = self.request.get('page')
-            
-            logging.info('COMMENTING!!')
-            if pg == 'ride':
-                fwdPage = 'ride'
-            else:
-                fwdPage = 'viewride'
-                
-            self.redirect('/user/' + fwdPage, False)
-        else:
-            self.redirect('/user/login', False)
-        
-
 class ViewRidePage(AbstractPage):
     
     def getTemplateVars(self, ride):
@@ -624,7 +606,9 @@ class ViewRidePage(AbstractPage):
             ridetime = ride.date.time() 
         else:
             ridedate = ''
-            ridetime = ''                
+            ridetime = ''
+            
+        comments = ride.comments
                 
         template_values = {
             'ride' : ride,
@@ -632,9 +616,10 @@ class ViewRidePage(AbstractPage):
             'participants' : ride.riders,
             'ridedate' : ridedate,
             'ridetime' : ridetime,
+            'comments' : comments,
             'STSINVITED' : datastore.STATUS_INVITED,
             'STSACCEPT' : datastore.STATUS_ACCEPTED,
-            'STSREJECT' : datastore.STATUS_REJECTED                
+            'STSREJECT' : datastore.STATUS_REJECTED          
         }
         
         return template_values
@@ -654,11 +639,10 @@ class ViewRidePage(AbstractPage):
         if self.isUserAuthorised():
             rideKey = self.request.get('rd')
             ride = datastore.Ride.get([rideKey])[0]
-            
+            user = datastore.User.getByUsername(self.username)
             sts = self.request.get('sts')
             if sts not in (None, ''):
                 logging.info('Change my status to ' + sts)
-                user = datastore.User.getByUsername(self.username)
                 riderList = [rider for rider in ride.riders if rider.user.key() == user.key()]
                 rider = None
         
@@ -666,8 +650,12 @@ class ViewRidePage(AbstractPage):
                     rider = riderList[0]
                     rider.status = int(sts)
                     rider.save()     
-                
-                
+            elif self.request.get('action') and self.request.get('action') == 'Comment':
+                comment = self.request.get('comment')
+                if comment not in (None, ''):
+                    logging.info('Leaving comment')
+                    comment = datastore.RideComment(ride=ride,user=user,comment=comment,date=datetime.datetime.today())
+                    comment.save()
             
             self.servePage(self.getTemplateVars(ride), 'viewride')
         else:
@@ -709,10 +697,11 @@ class EditRidesPage(AbstractPage):
                     rider.save()
 
             createdRides = datastore.Ride.getCreatedRides(self.username)
-            
+            invitedRides = datastore.Ride.getInvitedRides(self.username)
             template_values = {
                 'failReason' : msg,
-                'createdRides' : createdRides
+                'createdRides' : createdRides,
+                'invitedRides' : invitedRides
             }
             self.servePage(template_values, 'rides')
         else:
@@ -896,7 +885,6 @@ def main():
         ('/user/rides', EditRidesPage),
         ('/user/ride', EditRidePage),
         ('/user/viewride', ViewRidePage),
-        ('/user/ridecomment', RideCommentPage),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)

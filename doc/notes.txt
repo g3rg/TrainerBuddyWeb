@@ -52,8 +52,7 @@ TrainerBuddyWEB
 [x] accept invite from other rider
 [x] reject invite from other rider
 
-[ ] add comments on ride
-[ ] steak holders
+[x] add comments on ride
 [ ] FIX UI!
 	[ ] menu
 	[ ] test on iphone, android browser, IE, chrome, firefox
@@ -76,7 +75,8 @@ TrainerBuddyWEB
 [ ] recurring rides? 'copy ride' link?
 [ ] password reset!
 [ ] allow ride planning based on 'groups'? treat 'groups' as lists of friends or something bigger?
-
+[ ] moderation etc of comments? removal by admin?
+[ ] order comments by date, most recently first
 
 TrainerBuddyAgent (Android)
 -----------------

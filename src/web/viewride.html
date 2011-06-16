@@ -42,12 +42,10 @@
     </p>
     <input name="rd" id="rd" value="{{ride.key}}" type="hidden"/>
     <input name="sts" id="sts" value="" type="hidden"/>
-	</form>
 	<br/>
-	<form method="post" action="ridecomment" name="commentForm" id="commentForm">
     <p>
       <label for="comment">Comment:</label>
-      <textarea name="comment" id="comment"></textarea>
+      <input type="text" name="comment" id="comment"/>
     </p>
     <input name="rd" id="rd" value="{{ride.key}}" type="hidden"/>
     <input name="page" id="page" value="viewride" type="hidden"/>    
@@ -56,6 +54,14 @@
              id="submit-comment" />
     </p>
 	</form>
+	Comments:&nbsp;
+	<ul>
+	{% if comments %}
+	{% for comment in comments %}
+	<li>{{comment.date}}:&nbsp;{{comment.user.username}}&nbsp;{{comment.comment}}</li>
+	{% endfor %}
+	{% endif %}
+	</ul>
   </div>
 
 </body>
