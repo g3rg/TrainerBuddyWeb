@@ -1,0 +1,46 @@
+<html>
+<head>
+  <title>Ride</title>
+  <link type="text/css" rel="stylesheet" href="/style/main.css"/>  
+  <script language="javascript">
+  
+  function $(id){
+    return document.getElementById(id);
+  }
+  
+  function submitPage(friend, action) {
+	$("subaction").value = action;
+	$("selectedFriend").value = friend;
+	$("theForm").submit();
+  }
+  
+  </script>
+</head>
+<body>
+  <div>
+    {% if failReason %}
+    {{failReason}}<br/>
+    {% endif %}
+    <!-- {{ride.date}} -->
+    
+    <form method="post" action="ride" name="theForm" id="theForm">
+    <p>Title:{{ride.title}}</p>
+    <p>Description:{{ride.description}}</p>    
+    <p>Date:{{ridedate}}</p>
+    <p>Time:{{ridetime}}</p>
+    <p>Riders:<br/>
+    <ul>
+    {% if participants %}
+    {% for rider in participants %}
+    <li>{{rider.user.username}}&nbsp;-&nbsp;{{rider.statusdisplay}}</li>
+    {% endfor %}
+    {% endif %}    
+    </ul>
+    </p>
+    <input name="rd" id="rd" value="{{rideKey}}" type="hidden"/>
+    <input name="subaction" id="subaction" value="" type="hidden"/>
+	</form>
+  </div>
+
+</body>
+</html>

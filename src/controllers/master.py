@@ -532,12 +532,7 @@ class EditRidePage(AbstractPage):
             logging.info('Inviting ' + selectedUser.username + ' to ' + ride.title)
             rider = datastore.RideParticipant(ride=ride,user=selectedUser,status=datastore.STATUS_INVITED)
             rider.save()
-            
-                        
-        #if selectedUser and selectedUser.key() not in ride.undecided:
-        #    ride.undecided.append(selectedUser.key())
-        #    ride.save()
-    
+                
     def uninvite(self, ride, friendKey):
         selectedUser = datastore.User.getByKey(friendKey)
         
@@ -595,18 +590,43 @@ class EditRidePage(AbstractPage):
             self.servePage(template_values, 'ride')
         else:
             self.redirect('/user/login', False)
-    
+   
+class ViewRidePage(AbstractPage):
+    def get(self):
+        self.setAuthVariables()
+        if self.isUserAuthorised():
+            rideKey = self.request.get('rd')
+            ride = datastore.Ride.get([rideKey])[0]
+            participants = ride.riders
+
+            if ride.date:
+                ridedate = ride.date.date()
+                ridetime = ride.date.time() 
+            else:
+                ridedate = ''
+                ridetime = ''
+            
+            template_values = {
+                'ride' : ride,
+                'participants' : participants,
+                'ridedate' : ridedate,
+                'ridetime' : ridetime
+            }
+            
+            self.servePage(template_values, 'viewride')
+        else:
+            self.redirect('/user/login', False)
+            
     
 class EditRidesPage(AbstractPage):
     def get(self):
         self.setAuthVariables()
         if self.isUserAuthorised():
             createdRides = datastore.Ride.getCreatedRides(self.username)
-            # invitedRides = datastore.Ride.getInvitedRides(self.username)
-            
+            invitedRides = datastore.Ride.getInvitedRides(self.username)
             template_values = {
-                'createdRides' : createdRides
-             #   'invitedRides' : invitedRides
+                'createdRides' : createdRides,
+                'invitedRides' : invitedRides
             }
             self.servePage(template_values, 'rides')
         else:
@@ -627,8 +647,11 @@ class EditRidesPage(AbstractPage):
                 if datastore.Ride.existsForCreator(newRide, self.username):
                     msg = 'Ride with that name already exists'
                 else:
-                    ride = datastore.Ride(title=newRide,creator = datastore.User.getByUsername(self.username))
+                    user = datastore.User.getByUsername(self.username)
+                    ride = datastore.Ride(title=newRide,creator = user)
                     ride.save()
+                    rider = datastore.RideParticipant(ride=ride,user=user,status=datastore.STATUS_ACCEPTED)
+                    rider.save()
 
             createdRides = datastore.Ride.getCreatedRides(self.username)
             
@@ -817,6 +840,7 @@ def main():
         ('/user/group', EditGroupPage),
         ('/user/rides', EditRidesPage),
         ('/user/ride', EditRidePage),
+        ('/user/viewride', ViewRidePage),
         ('/json/ll', LodgeCurrentUserInfoJSON),
         ('/json/login', LoginJson),
         ('/user/*', DefaultUserPage)

@@ -231,6 +231,15 @@ class Ride(db.Model):
         return rides
         
     @classmethod
+    def getInvitedRides(cls, username):
+        user = User.getByUsername(username)
+        query = RideParticipant.gql('WHERE user = :1', user)
+        rides = []
+        for rideParticipation in query:
+            rides.append(rideParticipation.ride)
+        return rides
+        
+    @classmethod
     def exists(cls, ridename):
         if ridename not in (None, ''):
             query = cls.gql('WHERE title = :1', ridename)
@@ -251,6 +260,8 @@ class RideParticipant(db.Model):
     user = db.ReferenceProperty(reference_class=User)
     status = db.IntegerProperty(default=STATUS_INVITED)
 
+    def statusdisplay(self):
+        return {STATUS_INVITED:'invited',STATUS_ACCEPTED:'accepted',STATUS_REJECTED:'rejected'}[self.status];
 
 class Location(db.Model):
     user = db.ReferenceProperty(reference_class=User,required=True)

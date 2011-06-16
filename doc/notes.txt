@@ -46,10 +46,11 @@ TrainerBuddyWEB
     [x] remove participants from friend list
     [x] prevent double invitiation
 [x] uninvite people from ride
-  
+
+[x] add creator as invited to ride when created!
+[x] list who's coming on a ride  
 [ ] accept invite from other rider
 [ ] reject invite from other rider
-[ ] list who's coming on a ride
 
 [ ] validate email address
 	[ ] looks like a valid email address
