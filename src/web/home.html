@@ -9,12 +9,17 @@
     {{msg}}
     <br/>
     {% endif %}
-    Welcome{% if username %}, <b>{{username}}</b>,{% endif %} to whatever this is.
+    Welcome{% if username %}, <b>{{username}}</b>,{% endif %} to Trainerbuddy.
+    <ul style='menu'>
     {% if authorised %}
-   		<a href='./logout'>Logout</a>
+    	<li><a href='./friends'>Friends</a></li>
+    	<li><a href='./rides'>Rides</a></li>
+   		<li><a href='./logout'>Logout</a></li>
     {% else %}
-    	<a href='./login'>Login</a>
+    	<li><a href='./login'>Login</a><br/></li>
+    	<li><a href='./create'>Register</a></li>
     {% endif %}
+   	</ul>    
   </div>
 </body>
 </html>

@@ -61,12 +61,16 @@ TrainerBuddyWEB
 	[ ] rides page
 	[ ] edit ride page
 	[ ] view ride page
+	[ ] banner image? mobile sized!
 	[ ] groups?
+	
 
 [ ] validate email address
 	[ ] looks like a valid email address
 	[ ] email a link for confirmation of email address
 	[ ] handle link to activate account
+
+[ ] BETA TESTABLE?
 
 [ ] ring fencing of editing / viewing ????
 [ ] sanity checking of fields! fail nicely!

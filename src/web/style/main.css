@@ -1,15 +1,21 @@
+body {
+	background-color: #CCFFFF;	
+}
+
 form {
 	text-align:left; 
 	font: 13px sans-serif;
 }
 
 div {
-	width: 25em; 
-	margin: 1em auto;
+	float: left;
+	/* width: 25em;*/ 
+	/* margin: 1em auto; */
+	min-height: 15em;
 	text-align:left;
-    padding: 0 2em 1.25em 2em;
-    background-color: #d6e9f8;
-    border: 2px solid #67a7e3;
+    padding: 0.25em 0.5em 0.25em 0.5em;
+    /* background-color: #d6e9f8;*/
+    /* border: 2px solid #67a7e3;*/
 }
 
 p {
@@ -19,4 +25,8 @@ p {
 
 label {
       width: 3em;
+}
+
+li {
+	list-style-type: none;	
 }
